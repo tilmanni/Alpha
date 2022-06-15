@@ -206,6 +206,7 @@ public class RuleGroundingOrders {
 		// To avoid cross products, select those first that have some of their variables already bound.
 		for (Literal literal : remainingLiterals) {
 			if (!boundVariables.containsAll(literal.getNonBindingVariables())) {
+				//TODO could be used for determining Literals Associated with Aggregate
 				// Only consider literals whose nonbinding variables are already bound.
 				continue;
 			}

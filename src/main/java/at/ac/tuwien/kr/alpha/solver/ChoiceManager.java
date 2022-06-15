@@ -132,6 +132,7 @@ public class ChoiceManager implements Checkable {
 	void callbackOnChanged(int atom) {
 		choicePointInfluenceManager.callbackOnChanged(atom);
 		heuristicInfluenceManager.callbackOnChanged(atom);
+		//TODO Maybe Add Callbacks for Heuristic aggregates
 	}
 
 	public ChoiceManagerStatistics getStatistics() {

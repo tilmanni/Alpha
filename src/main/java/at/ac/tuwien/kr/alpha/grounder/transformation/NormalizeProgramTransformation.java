@@ -62,6 +62,7 @@ public class NormalizeProgramTransformation extends ProgramTransformation<InputP
 		tmpPrg = new HeuristicDirectiveConditionEnhancement(!this.ignoreDomspecHeuristics).apply(tmpPrg);
 		// Translate heuristic directives to rules.
 		tmpPrg = new HeuristicDirectiveToRule(!this.ignoreDomspecHeuristics).apply(tmpPrg);
+		//TODO Heuristic Aggregate Transformation
 		// Transform cardinality aggregates.
 		tmpPrg = new AggregateRewriting(aggregateRewritingCfg.isUseSortingGridEncoding(), aggregateRewritingCfg.isSupportNegativeValuesInSums()).apply(tmpPrg);
 		// Transform enumeration atoms.

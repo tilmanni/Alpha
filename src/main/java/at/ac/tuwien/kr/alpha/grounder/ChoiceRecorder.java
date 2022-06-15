@@ -152,7 +152,7 @@ public class ChoiceRecorder {
 		final int bodyRepresentingAtom = atomStore.putIfAbsent(bodyAtom);
 		newHeuristicAtoms.getLeft().put(bodyRepresentingAtom, influencers[IDX_ON]);
 		newHeuristicAtoms.getRight().put(bodyRepresentingAtom, influencers[IDX_OFF]);
-
+		//TODO Generate NoGoods for Heuristic Aggregates
 		if (newHeuristicValues.put(bodyRepresentingAtom, HeuristicDirectiveValues.fromHeuristicAtom(groundHeuristicAtom, headId)) != null) {
 			throw oops("Same heuristic body-representing atom used for two heuristic directives");
 		}

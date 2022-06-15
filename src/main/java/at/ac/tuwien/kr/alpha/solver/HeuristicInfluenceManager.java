@@ -108,6 +108,7 @@ public class HeuristicInfluenceManager extends InfluenceManager {
 		addHeuristicChoicePointToHeadAtomId(choicePoint, headAtom);
 		addHeuristicChoicePointToInfluencers(choicePoint, enablers);
 		addHeuristicChoicePointToInfluencers(choicePoint, disablers);
+		//TODO Maybe add Choicepoints for Heuristic Aggregates
 		choicePoint.recomputeActive();
 	}
 

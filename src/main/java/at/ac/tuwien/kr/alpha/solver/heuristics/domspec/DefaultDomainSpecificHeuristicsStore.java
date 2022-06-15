@@ -80,6 +80,7 @@ public class DefaultDomainSpecificHeuristicsStore implements DomainSpecificHeuri
 		@Override
 		public void callbackOnChanged(int atom, boolean active) {
 			if (active) {
+				//TODO last point to update Value / Weight
 				prioritisedHeuristics.add(atom);
 			} else {
 				prioritisedHeuristics.remove(atom);

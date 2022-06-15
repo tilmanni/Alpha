@@ -664,6 +664,7 @@ public class ParseTreeVisitor extends AlphaASPBaseVisitor<Object> {
 	public HeuristicDirectiveLiteral visitHeuristic_body_literal(AlphaASPParser.Heuristic_body_literalContext ctx) {
 		// heuristic_body_literal : NAF? heuristic_body_atom | aggregate;
 		if (ctx.aggregate() != null) {
+			//TODO Heuristic Aggregate occurs here
 			final AggregateLiteral aggregateLiteral = visitAggregate(ctx.aggregate());
 			return new HeuristicDirectiveLiteral(HeuristicDirectiveAtom.body(aggregateLiteral.getAtom()), !aggregateLiteral.isNegated());
 		} else {

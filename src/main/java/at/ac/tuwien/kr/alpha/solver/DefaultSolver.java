@@ -537,6 +537,7 @@ public class DefaultSolver extends AbstractSolver implements SolverMaintainingSt
 	private boolean choose() {
 		choiceManager.addChoiceInformation(grounder.getChoiceAtoms(), grounder.getHeadsToBodies());
 		choiceManager.addHeuristicInformation(grounder.getHeuristicAtoms(), grounder.getHeuristicValues());
+		//TODO Maybe new evaluation of Heuristics with heuristic aggregates
 		choiceManager.updateAssignments();
 
 		if (assignment.getNumberOfActiveChoicePoints() == 0) {
@@ -544,6 +545,7 @@ public class DefaultSolver extends AbstractSolver implements SolverMaintainingSt
 		}
 
 		// Hint: for custom heuristics, evaluate them here and pick a value if the heuristics suggests one.
+		//TODO Maybe define Custom Heuristic here, which supersedes standard.
 		int literal;
 		if ((literal = branchingHeuristic.chooseLiteral()) == DEFAULT_CHOICE_LITERAL) {
 			LOGGER.debug("No choices!");
