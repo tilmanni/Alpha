@@ -27,6 +27,7 @@
  */
 package at.ac.tuwien.kr.alpha.grounder.parser;
 
+import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicAggregateAtom;
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -662,12 +663,16 @@ public class ParseTreeVisitor extends AlphaASPBaseVisitor<Object> {
 
 	@Override
 	public HeuristicDirectiveLiteral visitHeuristic_body_literal(AlphaASPParser.Heuristic_body_literalContext ctx) {
-		// heuristic_body_literal : NAF? heuristic_body_atom | aggregate;
+		// heuristic_body_literal : NAF? heuristic_body_atom | aggregate | heuristic_aggregate;
 		if (ctx.aggregate() != null) {
-			//TODO Heuristic Aggregate occurs here
 			final AggregateLiteral aggregateLiteral = visitAggregate(ctx.aggregate());
 			return new HeuristicDirectiveLiteral(HeuristicDirectiveAtom.body(aggregateLiteral.getAtom()), !aggregateLiteral.isNegated());
-		} else {
+		}
+		else if (ctx.heuristic_aggregate() != null) {
+			final AggregateLiteral aggregateLiteral = visitHeuristic_aggregate(ctx.heuristic_aggregate());
+			return new HeuristicDirectiveLiteral(HeuristicDirectiveAtom.body(aggregateLiteral.getAtom()), !aggregateLiteral.isNegated());
+		}
+		else {
 			return new HeuristicDirectiveLiteral(visitHeuristic_body_atom(ctx.heuristic_body_atom()), ctx.NAF() == null);
 		}
 	}
@@ -743,6 +748,77 @@ public class ParseTreeVisitor extends AlphaASPBaseVisitor<Object> {
 		Term upper = ictx.upperNum != null ? ConstantTerm.getInstance(Integer.parseInt(ictx.upperNum.getText())) : VariableTerm.getInstance(ictx.upperVar.getText());
 		return IntervalTerm.getInstance(lower, upper);
 	}
+
+	@Override
+	public AggregateLiteral visitHeuristic_aggregate(AlphaASPParser.Heuristic_aggregateContext ctx) {
+		// heuristic_aggregate : NAF? (lt=term lop=binop)? aggregate_function CURLY_OPEN CURLY_OPEN heuristic_aggregate_elements CURLY_CLOSE CURLY_CLOSE (uop=binop ut=term)?;
+		boolean isPositive = ctx.NAF() == null;
+		Term lt = null;
+		ComparisonOperator lop = null;
+		Term ut = null;
+		ComparisonOperator uop = null;
+		if (ctx.lt != null) {
+			lt = (Term) visit(ctx.lt);
+			lop = visitBinop(ctx.lop);
+		}
+		if (ctx.ut != null) {
+			ut = (Term) visit(ctx.ut);
+			uop = visitBinop(ctx.uop);
+		}
+		AggregateAtom.AggregateFunctionSymbol aggregateFunction = visitAggregate_function(ctx.aggregate_function());
+		List<AggregateAtom.AggregateElement> aggregateElements = visitHeuristic_aggregate_elements(ctx.heuristic_aggregate_elements());
+		return new HeuristicAggregateAtom(lop, lt, uop, ut, aggregateFunction, aggregateElements).toLiteral(isPositive);
+	}
+
+	@Override
+	public List<AggregateAtom.AggregateElement> visitHeuristic_aggregate_elements(AlphaASPParser.Heuristic_aggregate_elementsContext ctx) {
+		// heuristic_aggregate_elements : heuristic_aggregate_element (SEMICOLON heuristic_aggregate_elements)?;
+		final List<AggregateAtom.AggregateElement> aggregateElements = new ArrayList<>();
+		do {
+			aggregateElements.add(visitHeuristic_aggregate_element(ctx.heuristic_aggregate_element()));
+		} while ((ctx = ctx.heuristic_aggregate_elements()) != null);
+
+		return aggregateElements;
+	}
+
+	@Override
+	public AggregateAtom.AggregateElement visitHeuristic_aggregate_element(AlphaASPParser.Heuristic_aggregate_elementContext ctx) {
+		// heuristic_aggregate_element : basic_terms? (COLON heuristic_aggregate_literals?)?;
+		List<Term> basicTerms = ctx.basic_terms() != null ? visitBasic_terms(ctx.basic_terms()) : null;
+		if (ctx.heuristic_aggregate_literals() != null) {
+			return new AggregateAtom.AggregateElement(basicTerms, visitHeuristic_aggregate_literals(ctx.heuristic_aggregate_literals()));
+		}
+		return new AggregateAtom.AggregateElement(basicTerms, Collections.emptyList());
+	}
+
+	@Override
+	public List<Literal> visitHeuristic_aggregate_literals(AlphaASPParser.Heuristic_aggregate_literalsContext ctx) {
+		// naf_literals : naf_literal (COMMA naf_literals)?;
+		// heuristic_aggregate_literals : atom (COMMA atom)?;
+		List<Literal> literals;
+		if (ctx.heuristic_aggregate_literals() != null) {
+			literals = visitHeuristic_aggregate_literals(ctx.heuristic_aggregate_literals());
+		} else {
+			literals = new LinkedList<>();
+		}
+		literals.add(0, visitHeuristic_aggregate_literal(ctx.heuristic_aggregate_literal()));
+		return literals;
+	}
+
+	@Override
+	public Literal visitHeuristic_aggregate_literal(AlphaASPParser.Heuristic_aggregate_literalContext ctx) {
+		// heuristic_aggregate_literal : atom;
+		Atom atom = visitAtom(ctx.atom());
+		if (atom instanceof ComparisonAtom) {
+			return new ComparisonLiteral((ComparisonAtom) atom, true);
+		} else if (atom instanceof BasicAtom) {
+			return new BasicLiteral((BasicAtom) atom, true);
+		} else if (atom instanceof ExternalAtom) {
+			return new ExternalLiteral((ExternalAtom) atom, true);
+		}
+		throw notSupported(ctx);
+	}
+
 
 	@Override
 	public Object visitTerm_minusArithTerm(AlphaASPParser.Term_minusArithTermContext ctx) {

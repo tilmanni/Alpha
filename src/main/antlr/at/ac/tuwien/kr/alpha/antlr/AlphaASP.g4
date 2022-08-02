@@ -52,7 +52,17 @@ heuristic_head_sign : HEU_SIGN_T | HEU_SIGN_F;
 
 heuristic_body : COLON heuristic_body_literal (COMMA heuristic_body_literal)*;
 
-heuristic_body_literal : NAF? heuristic_body_atom | aggregate;
+heuristic_body_literal : NAF? heuristic_body_atom | aggregate | heuristic_aggregate;
+
+heuristic_aggregate : NAF? (lt=term lop=binop)? aggregate_function CURLY_OPEN CURLY_OPEN heuristic_aggregate_elements CURLY_CLOSE CURLY_CLOSE (uop=binop ut=term)?;
+
+heuristic_aggregate_elements : heuristic_aggregate_element (SEMICOLON heuristic_aggregate_elements)?;
+
+heuristic_aggregate_element : basic_terms? (COLON heuristic_aggregate_literals?)?;
+
+heuristic_aggregate_literals : heuristic_aggregate_literal (COMMA heuristic_aggregate_literals)?;
+
+heuristic_aggregate_literal : atom;
 
 heuristic_body_atom : (heuristic_body_sign? basic_atom) | builtin_atom | external_atom;
 
