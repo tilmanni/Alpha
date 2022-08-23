@@ -2,26 +2,18 @@ package at.ac.tuwien.kr.alpha.grounder.transformation.aggregates;
 
 import static at.ac.tuwien.kr.alpha.Util.oops;
 
+import at.ac.tuwien.kr.alpha.common.atoms.*;
+import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicAggregateAtom;
+import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveAtom;
+import at.ac.tuwien.kr.alpha.grounder.transformation.aggregates.encoders.ReplacementEncoder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.stringtemplate.v4.ST;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import at.ac.tuwien.kr.alpha.common.ComparisonOperator;
 import at.ac.tuwien.kr.alpha.common.Predicate;
-import at.ac.tuwien.kr.alpha.common.atoms.AggregateAtom;
 import at.ac.tuwien.kr.alpha.common.atoms.AggregateAtom.AggregateFunctionSymbol;
-import at.ac.tuwien.kr.alpha.common.atoms.AggregateLiteral;
-import at.ac.tuwien.kr.alpha.common.atoms.Atom;
-import at.ac.tuwien.kr.alpha.common.atoms.BasicAtom;
-import at.ac.tuwien.kr.alpha.common.atoms.Literal;
 import at.ac.tuwien.kr.alpha.common.rule.BasicRule;
 import at.ac.tuwien.kr.alpha.common.terms.ConstantTerm;
 import at.ac.tuwien.kr.alpha.common.terms.FunctionTerm;
@@ -66,6 +58,7 @@ public final class AggregateRewritingContext {
 		}
 		// Do initial registration of each aggregate literal and keep the ids.
 		for (Map.Entry<AggregateLiteral, Set<VariableTerm>> entry : ruleAnalysis.globalVariablesPerAggregate.entrySet()) {
+			//TODO Maybe add parameter for when occurring in heuristic.
 			registerAggregateLiteral(entry.getKey(), entry.getValue());
 		}
 		// Now go through dependencies and replace the actual aggregate literals with their rewritten versions
@@ -74,6 +67,7 @@ public final class AggregateRewritingContext {
 			for (Literal dependency : entry.getValue()) {
 				if (dependency instanceof AggregateLiteral) {
 					AggregateInfo dependencyInfo = getAggregateInfo((AggregateLiteral) dependency);
+					//TODO Maybe Replace with appropriate Replacement
 					aggregateInfo.addDependency(dependencyInfo.getOutputAtom().toLiteral(!dependency.isNegated()));
 				} else {
 					aggregateInfo.addDependency(dependency);
@@ -87,7 +81,13 @@ public final class AggregateRewritingContext {
 	private void registerAggregateLiteral(AggregateLiteral lit, Set<VariableTerm> globalVariables) {
 		AggregateAtom atom = lit.getAtom();
 		String id = atom.getAggregatefunction().toString().toLowerCase() + "_" + (++idCounter);
-		AggregateInfo info = new AggregateInfo(id, lit, globalVariables);
+		AggregateInfo info;
+		if (atom instanceof HeuristicAggregateAtom) {
+			info = new AggregateInfo(id, lit, globalVariables, true);
+		}
+		else {
+			info = new AggregateInfo(id, lit, globalVariables);
+		}
 		if (aggregateInfos.containsKey(lit)) {
 			throw oops("AggregateInfo for AggregateLiteral already existing.");
 		}
@@ -116,12 +116,34 @@ public final class AggregateRewritingContext {
 		private final Term aggregateArguments;
 		private final Set<Literal> dependencies = new LinkedHashSet<>();
 
+		private final boolean isDynamic;
+
+		private final Set<Atom> outputAtoms;
+
+		private List<HeuristicDirectiveAtom> positiveConditions;
+
+		private List<HeuristicDirectiveAtom> negativeConditions;
+
 		AggregateInfo(String id, AggregateLiteral literal, Set<VariableTerm> globalVariables) {
 			this.id = id;
 			this.literal = literal;
 			this.globalVariables = globalVariables;
+			this.isDynamic = false;
 			this.aggregateArguments = buildArguments();
 			this.outputAtom = buildOutputAtom();
+			this.outputAtoms = null;
+			this.positiveConditions = null;
+			this.negativeConditions = null;
+		}
+
+		AggregateInfo(String id, AggregateLiteral literal, Set<VariableTerm> globalVariables, boolean isDynamic) {
+			this.id = id;
+			this.literal = literal;
+			this.globalVariables = globalVariables;
+			this.isDynamic = isDynamic;
+			this.aggregateArguments = buildArguments();
+			this.outputAtom = buildOutputAtom();
+			this.outputAtoms = buildOutputAtoms();
 		}
 
 		/**
@@ -155,7 +177,23 @@ public final class AggregateRewritingContext {
 			String outputPredicateName = new ST(AGGREGATE_RESULT_TEMPLATE).add("id", id).render();
 			Term argumentTerm = aggregateArguments;
 			Term resultTerm = literal.getAtom().getLowerBoundTerm();
+			//TODO If Predicates are not solver-internal, change output predicate here
 			return new BasicAtom(Predicate.getInstance(outputPredicateName, 2, true), argumentTerm, resultTerm);
+		}
+
+		private Set<Atom> buildOutputAtoms() {
+			Set<Atom> tempOutputAtoms = new HashSet<>();
+
+			Map<String, List<HeuristicDirectiveAtom>> replacement = ReplacementEncoder.getReplacements(literal.getAtom(), aggregateArguments, id);
+
+			positiveConditions = replacement.get("positive");
+			negativeConditions = replacement.get("negative");
+
+			for (HeuristicDirectiveAtom positiveAtom : positiveConditions) {
+				tempOutputAtoms.add(positiveAtom.getAtom());
+			}
+
+			return tempOutputAtoms;
 		}
 
 		private void addDependency(Literal dependency) {
@@ -184,6 +222,22 @@ public final class AggregateRewritingContext {
 
 		public Set<Literal> getDependencies() {
 			return dependencies;
+		}
+
+		public boolean getIsDynamic() {
+			return isDynamic;
+		}
+
+		public Set<Atom> getOutputAtoms() {
+			return outputAtoms;
+		}
+
+		public List<HeuristicDirectiveAtom> getPositiveConditions() {
+			return positiveConditions;
+		}
+
+		public List<HeuristicDirectiveAtom> getNegativeConditions() {
+			return negativeConditions;
 		}
 
 	}

@@ -39,9 +39,11 @@ import at.ac.tuwien.kr.alpha.Util;
 import at.ac.tuwien.kr.alpha.common.HeuristicDirective;
 import at.ac.tuwien.kr.alpha.common.Predicate;
 import at.ac.tuwien.kr.alpha.common.WeightAtLevel;
+import at.ac.tuwien.kr.alpha.common.atoms.AggregateAtom;
 import at.ac.tuwien.kr.alpha.common.atoms.Atom;
 import at.ac.tuwien.kr.alpha.common.atoms.BasicAtom;
 import at.ac.tuwien.kr.alpha.common.atoms.Literal;
+import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicAggregateAtom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveAtom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveLiteral;
 import at.ac.tuwien.kr.alpha.common.terms.ConstantTerm;
@@ -210,7 +212,15 @@ public class HeuristicAtom extends Atom {
 		);
 	}
 
-	private static FunctionTerm conditionToFunctionTerm(Collection<HeuristicDirectiveAtom> heuristicDirectiveAtoms, String topLevelFunctionName) {
+	public FunctionTerm getPositiveCondition() {
+		return this.positiveCondition;
+	}
+
+	public FunctionTerm getNegativeCondition() {
+		return this.negativeCondition;
+	}
+
+	public static FunctionTerm conditionToFunctionTerm(Collection<HeuristicDirectiveAtom> heuristicDirectiveAtoms, String topLevelFunctionName) {
 		final List<Term> terms = new ArrayList<>(heuristicDirectiveAtoms.size());
 		for (HeuristicDirectiveAtom heuristicDirectiveAtom : heuristicDirectiveAtoms) {
 			final Atom atom = heuristicDirectiveAtom.getAtom();
@@ -232,4 +242,5 @@ public class HeuristicAtom extends Atom {
 		}
 		return condition;
 	}
+
 }

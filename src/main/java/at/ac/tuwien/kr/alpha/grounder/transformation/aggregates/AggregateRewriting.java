@@ -1,5 +1,13 @@
 package at.ac.tuwien.kr.alpha.grounder.transformation.aggregates;
 
+import at.ac.tuwien.kr.alpha.common.atoms.Atom;
+import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicAggregateAtom;
+import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveAtom;
+import at.ac.tuwien.kr.alpha.common.rule.head.Head;
+import at.ac.tuwien.kr.alpha.common.rule.head.NormalHead;
+import at.ac.tuwien.kr.alpha.common.terms.FunctionTerm;
+import at.ac.tuwien.kr.alpha.common.terms.Term;
+import at.ac.tuwien.kr.alpha.grounder.atoms.HeuristicAtom;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
@@ -83,9 +91,11 @@ public class AggregateRewriting extends ProgramTransformation<InputProgram, Inpu
 			}
 		}
 		// Substitute AggregateLiterals with generated result literals.
+		//TODO Add different Substitution for heuristic aggregates
 		outputRules.addAll(rewriteRulesWithAggregates(ctx));
 		InputProgram.Builder resultBuilder = InputProgram.builder().addRules(outputRules).addFacts(inputProgram.getFacts())
 				.addInlineDirectives(inputProgram.getInlineDirectives());
+
 		// Add sub-programs deriving respective aggregate literals.
 		for (Map.Entry<ImmutablePair<AggregateFunctionSymbol, ComparisonOperator>, Set<AggregateInfo>> aggToRewrite : ctx.getAggregateFunctionsToRewrite()
 				.entrySet()) {
@@ -132,17 +142,47 @@ public class AggregateRewriting extends ProgramTransformation<InputProgram, Inpu
 	 */
 	private static List<BasicRule> rewriteRulesWithAggregates(AggregateRewritingContext ctx) {
 		List<BasicRule> rewrittenRules = new ArrayList<>();
+		//TODO Maybe check if in Heuristic
 		for (BasicRule rule : ctx.getRulesWithAggregates()) {
 			List<Literal> rewrittenBody = new ArrayList<>();
+			Head rewrittenHead = rule.getHead();
 			for (Literal lit : rule.getBody()) {
 				if (lit instanceof AggregateLiteral) {
 					AggregateInfo aggregateInfo = ctx.getAggregateInfo((AggregateLiteral) lit);
-					rewrittenBody.add(new BasicLiteral(aggregateInfo.getOutputAtom(), !lit.isNegated()));
+					if (aggregateInfo.getIsDynamic()) {
+						Head temp = rule.getHead();
+						if (temp instanceof NormalHead) {
+							HeuristicAtom old = (HeuristicAtom) ((NormalHead) temp).getAtom();;
+
+							List<HeuristicDirectiveAtom> oldPositive = old.getOriginalPositiveCondition();
+							List<HeuristicDirectiveAtom> oldNegative = old.getOriginalNegativeCondition();
+
+
+							oldPositive.addAll(aggregateInfo.getPositiveConditions());
+							oldNegative.addAll(aggregateInfo.getNegativeConditions());
+
+							FunctionTerm newPositiveCondition = HeuristicAtom.conditionToFunctionTerm(oldPositive, old.getPositiveCondition().getSymbol());
+							FunctionTerm newNegativeCondition = HeuristicAtom.conditionToFunctionTerm(oldNegative, old.getNegativeCondition().getSymbol());
+
+							HeuristicAtom newHeadAtom = new HeuristicAtom(old.getWeightAtLevel(), old.getHeadSign(), old.getHeadAtom(), newPositiveCondition, newNegativeCondition);
+							rewrittenHead = new NormalHead(newHeadAtom);
+						}
+						Set<Atom> bodyReplacementAtoms = aggregateInfo.getOutputAtoms();
+						for (Atom atom : bodyReplacementAtoms) {
+							rewrittenBody.add(atom.toLiteral(true));
+						}
+						//TODO Change from BasicLiteral back to BasicAtom
+						//TODO Add functionality to allow for lit.isNegated()
+						//Currently, negation is not allowed
+					}
+					else {
+						rewrittenBody.add(new BasicLiteral(aggregateInfo.getOutputAtom(), !lit.isNegated()));
+					}
 				} else {
 					rewrittenBody.add(lit);
 				}
 			}
-			rewrittenRules.add(new BasicRule(rule.getHead(), rewrittenBody));
+			rewrittenRules.add(new BasicRule(rewrittenHead, rewrittenBody));
 		}
 		return rewrittenRules;
 	}
