@@ -110,6 +110,8 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 	private final LiteralInstantiator ruleInstantiator;
 	private final DefaultLazyGroundingInstantiationStrategy instantiationStrategy;
 
+	private boolean ignoreDynamicAggregates = true;
+
 	public NaiveGrounder(InternalProgram program, AtomStore atomStore, HeuristicsConfiguration heuristicsConfiguration, boolean debugInternalChecks, Bridge... bridges) {
 		this(program, atomStore, heuristicsConfiguration, new GrounderHeuristicsConfiguration(), debugInternalChecks, bridges);
 	}
@@ -351,6 +353,8 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 		// In first call, prepare facts and ground rules.
 		final Map<Integer, NoGood> newNoGoods = fixedRules != null ? bootstrap() : new LinkedHashMap<>();
 
+		LinkedHashSet<IndexedInstanceStorage> toRemember = new LinkedHashSet<>();
+
 		// Compute new ground rule (evaluate joins with newly changed atoms)
 		for (IndexedInstanceStorage modifiedWorkingMemory : workingMemory.modified()) {
 			// Skip predicates solely used in the solver which do not occur in rules.
@@ -367,9 +371,20 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 				continue;
 			}
 
+			boolean remembered = false;
+
 			for (FirstBindingAtom firstBindingAtom : firstBindingAtoms) {
 				// Use the recently added instances from the modified working memory to construct an initial substitution
 				InternalRule nonGroundRule = firstBindingAtom.rule;
+
+				if (ignoreDynamicAggregates && nonGroundRule.isHeuristicRule()) {
+					HeuristicAtom headAtom = (HeuristicAtom) nonGroundRule.getHeadAtom();
+					if (headAtom.getHasDynamicAggregate()) {
+						toRemember.add(modifiedWorkingMemory);
+						remembered = true;
+						continue;
+					}
+				}
 
 				// Generate substitutions from each recent instance.
 				for (Instance instance : modifiedWorkingMemory.getRecentlyAddedInstances()) {
@@ -393,10 +408,14 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 			}
 
 			// Mark instances added by updateAssignment as done
-			modifiedWorkingMemory.markRecentlyAddedInstancesDone();
+			if (!remembered) {
+				modifiedWorkingMemory.markRecentlyAddedInstancesDone();
+			}
 		}
 
-		workingMemory.reset();
+		//workingMemory.reset();
+		workingMemory.exclusiveReset(toRemember);
+
 		for (Atom removeAtom : removeAfterObtainingNewNoGoods) {
 			final IndexedInstanceStorage storage = workingMemory.get(removeAtom, true);
 			Instance instance = new Instance(removeAtom.getTerms());
@@ -693,4 +712,7 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 		}
 	}
 
+	public void setIgnoreDynamicAggregates(boolean ignoreDynamicAggregates) {
+		this.ignoreDynamicAggregates = ignoreDynamicAggregates;
+	}
 }

@@ -107,6 +107,10 @@ public class WorkingMemory {
 		modifiedWorkingMemories = new LinkedHashSet<>();
 	}
 
+	public void exclusiveReset(LinkedHashSet<IndexedInstanceStorage> toRemember) {
+		modifiedWorkingMemories = toRemember;
+	}
+
 	public Set<IndexedInstanceStorage> modified() {
 		return modifiedWorkingMemories;
 	}

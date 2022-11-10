@@ -1,12 +1,10 @@
 package at.ac.tuwien.kr.alpha.grounder.transformation.aggregates;
 
 import at.ac.tuwien.kr.alpha.common.atoms.Atom;
-import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicAggregateAtom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveAtom;
 import at.ac.tuwien.kr.alpha.common.rule.head.Head;
 import at.ac.tuwien.kr.alpha.common.rule.head.NormalHead;
 import at.ac.tuwien.kr.alpha.common.terms.FunctionTerm;
-import at.ac.tuwien.kr.alpha.common.terms.Term;
 import at.ac.tuwien.kr.alpha.grounder.atoms.HeuristicAtom;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -152,7 +150,7 @@ public class AggregateRewriting extends ProgramTransformation<InputProgram, Inpu
 					if (aggregateInfo.getIsDynamic()) {
 						Head temp = rule.getHead();
 						if (temp instanceof NormalHead) {
-							HeuristicAtom old = (HeuristicAtom) ((NormalHead) temp).getAtom();;
+							HeuristicAtom old = (HeuristicAtom) ((NormalHead) temp).getAtom();
 
 							List<HeuristicDirectiveAtom> oldPositive = old.getOriginalPositiveCondition();
 							List<HeuristicDirectiveAtom> oldNegative = old.getOriginalNegativeCondition();
@@ -165,6 +163,7 @@ public class AggregateRewriting extends ProgramTransformation<InputProgram, Inpu
 							FunctionTerm newNegativeCondition = HeuristicAtom.conditionToFunctionTerm(oldNegative, old.getNegativeCondition().getSymbol());
 
 							HeuristicAtom newHeadAtom = new HeuristicAtom(old.getWeightAtLevel(), old.getHeadSign(), old.getHeadAtom(), newPositiveCondition, newNegativeCondition);
+							newHeadAtom.setHasDynamicAggregate(true);
 							rewrittenHead = new NormalHead(newHeadAtom);
 						}
 						Set<Atom> bodyReplacementAtoms = aggregateInfo.getOutputAtoms();

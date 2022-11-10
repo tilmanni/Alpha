@@ -39,11 +39,9 @@ import at.ac.tuwien.kr.alpha.Util;
 import at.ac.tuwien.kr.alpha.common.HeuristicDirective;
 import at.ac.tuwien.kr.alpha.common.Predicate;
 import at.ac.tuwien.kr.alpha.common.WeightAtLevel;
-import at.ac.tuwien.kr.alpha.common.atoms.AggregateAtom;
 import at.ac.tuwien.kr.alpha.common.atoms.Atom;
 import at.ac.tuwien.kr.alpha.common.atoms.BasicAtom;
 import at.ac.tuwien.kr.alpha.common.atoms.Literal;
-import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicAggregateAtom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveAtom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveLiteral;
 import at.ac.tuwien.kr.alpha.common.terms.ConstantTerm;
@@ -77,6 +75,8 @@ public class HeuristicAtom extends Atom {
 	private final FunctionTerm positiveCondition;
 	private final FunctionTerm negativeCondition;
 	private final boolean ground;
+
+	private boolean hasDynamicAggregate = false;
 
 	public HeuristicAtom(WeightAtLevel weightAtLevel, ThriceTruth headSign, FunctionTerm headAtom, FunctionTerm positiveCondition, FunctionTerm negativeCondition) {
 		this.weightAtLevel = weightAtLevel;
@@ -243,4 +243,11 @@ public class HeuristicAtom extends Atom {
 		return condition;
 	}
 
+	public void setHasDynamicAggregate(boolean hasDynamicAggregate) {
+		this.hasDynamicAggregate = hasDynamicAggregate;
+	}
+
+	public boolean getHasDynamicAggregate() {
+		return hasDynamicAggregate;
+	}
 }

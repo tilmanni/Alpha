@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import at.ac.tuwien.kr.alpha.grounder.NaiveGrounder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,6 +110,8 @@ public class DefaultSolver extends AbstractSolver implements SolverMaintainingSt
 
 	private final PerformanceLog performanceLog;
 
+	private boolean enableDynamicAggregateGrounding = false;
+
 	public DefaultSolver(AtomStore atomStore, Grounder grounder, NoGoodStore store, WritableAssignment assignment, Random random, SystemConfig config, HeuristicsConfiguration heuristicsConfiguration) {
 		super(atomStore, grounder);
 
@@ -168,7 +171,11 @@ public class DefaultSolver extends AbstractSolver implements SolverMaintainingSt
 				LOGGER.debug("Updating grounder with new assignments and (potentially) obtaining new NoGoods.");
 				grounder.updateAssignment(assignment.getNewPositiveAssignmentsIterator());
 				getNoGoodsFromGrounderAndIngest();
-			} else if (choose()) {
+			} else if (!enableDynamicAggregateGrounding) {
+				enableDynamicAggregates();
+				getNoGoodsFromGrounderAndIngest();
+			}
+			else if (choose()) {
 				LOGGER.debug("Did choice.");
 			} else if (close()) {
 				LOGGER.debug("Closed unassigned known atoms (assigning FALSE).");
@@ -541,6 +548,7 @@ public class DefaultSolver extends AbstractSolver implements SolverMaintainingSt
 		choiceManager.updateAssignments();
 
 		if (assignment.getNumberOfActiveChoicePoints() == 0) {
+			disableDynamicAggregates();
 			return false;
 		}
 
@@ -549,12 +557,14 @@ public class DefaultSolver extends AbstractSolver implements SolverMaintainingSt
 		int literal;
 		if ((literal = branchingHeuristic.chooseLiteral()) == DEFAULT_CHOICE_LITERAL) {
 			LOGGER.debug("No choices!");
+			disableDynamicAggregates();
 			return false;
 		} else if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Branching heuristic chose literal {}", atomStore.literalToString(literal));
 		}
 
 		choiceManager.choose(new Choice(literal, false));
+		disableDynamicAggregates();
 		return true;
 	}
 
@@ -650,5 +660,19 @@ public class DefaultSolver extends AbstractSolver implements SolverMaintainingSt
 
 	public void setChecksEnabled(boolean checksEnabled) {
 		choiceManager.setChecksEnabled(checksEnabled);
+	}
+
+	private void enableDynamicAggregates() {
+		enableDynamicAggregateGrounding = true;
+		if (grounder instanceof NaiveGrounder) {
+			((NaiveGrounder) grounder).setIgnoreDynamicAggregates(false);
+		}
+	}
+
+	private void disableDynamicAggregates() {
+		enableDynamicAggregateGrounding = false;
+		if (grounder instanceof NaiveGrounder) {
+			((NaiveGrounder) grounder).setIgnoreDynamicAggregates(true);
+		}
 	}
 }
