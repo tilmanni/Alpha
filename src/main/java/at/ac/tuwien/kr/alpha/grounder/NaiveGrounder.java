@@ -136,7 +136,7 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 		this.initializeFactsAndRules();
 
 		final Set<InternalRule> uniqueGroundRulePerGroundHead = getRulesWithUniqueHead();
-		choiceRecorder = new ChoiceRecorder(atomStore);
+		choiceRecorder = new ChoiceRecorder(atomStore, workingMemory);
 		noGoodGenerator = new NoGoodGenerator(atomStore, choiceRecorder, this.program, uniqueGroundRulePerGroundHead);
 		this.debugInternalChecks = debugInternalChecks;
 
@@ -389,7 +389,6 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 				// Generate substitutions from each recent instance.
 				for (Instance instance : modifiedWorkingMemory.getRecentlyAddedInstances()) {
 					// Check instance if it matches with the atom.
-
 					final Substitution unifier = Substitution.specializeSubstitution(firstBindingAtom.startingLiteral, instance,
 							Substitution.EMPTY_SUBSTITUTION);
 

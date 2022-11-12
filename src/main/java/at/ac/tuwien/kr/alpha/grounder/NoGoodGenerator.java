@@ -80,6 +80,7 @@ public class NoGoodGenerator {
 	 */
 	Collection<NoGood> generateNoGoodsFromGroundSubstitution(final InternalRule nonGroundRule, final Substitution substitution) {
 		final boolean isHeuristicRule = nonGroundRule.getHeadAtom() instanceof HeuristicAtom;
+		final boolean hasDynamicAggregate = isHeuristicRule && ((HeuristicAtom) nonGroundRule.getHeadAtom()).getHasDynamicAggregate(); //TODO Change this abomination somehow
 		final List<Integer> posLiterals = collectPosLiterals(nonGroundRule, substitution);
 		final List<Integer> negLiterals = collectNegLiterals(nonGroundRule, substitution);
 
@@ -91,7 +92,6 @@ public class NoGoodGenerator {
 		if (nonGroundRule.isConstraint()) {
 			return singletonList(NoGoodCreator.fromConstraint(posLiterals, negLiterals));
 		}
-
 		final Atom groundHeadAtom = nonGroundRule.getHeadAtom().substitute(substitution);
 		// Prepare atom representing the rule body.
 		final RuleAtom bodyAtom = new RuleAtom(nonGroundRule, substitution);
@@ -105,7 +105,9 @@ public class NoGoodGenerator {
 		}
 
 		if (isHeuristicRule) {
-			return generateNoGoodsForHeuristicRule((HeuristicAtom) groundHeadAtom, bodyAtom);
+			HeuristicAtom groundHeuristicHeadAtom = (HeuristicAtom) groundHeadAtom;
+			groundHeuristicHeadAtom.setHasDynamicAggregate(hasDynamicAggregate);
+			return generateNoGoodsForHeuristicRule(groundHeuristicHeadAtom, bodyAtom);
 		} else {
 			return generateNoGoodsForNonConstraintNonHeuristicRule(nonGroundRule, posLiterals, negLiterals, groundHeadAtom, bodyAtom);
 		}

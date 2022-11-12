@@ -72,6 +72,8 @@ public class ChoiceRecorder {
 	private static final int IDX_ON = 0;
 
 	private final AtomStore atomStore;
+
+	private final WorkingMemory workingMemory;
 	private Pair<Map<Integer, Integer>, Map<Integer, Integer>> newChoiceAtoms = new ImmutablePair<>(new LinkedHashMap<>(), new LinkedHashMap<>());
 	private Pair<Map<Integer, Integer[]>, Map<Integer, Integer[]>> newHeuristicAtoms = new ImmutablePair<>(new LinkedHashMap<>(), new LinkedHashMap<>());
 	private Map<Integer, HeuristicDirectiveValues> newHeuristicValues = new LinkedHashMap<>();
@@ -79,6 +81,12 @@ public class ChoiceRecorder {
 
 	public ChoiceRecorder(AtomStore atomStore) {
 		this.atomStore = atomStore;
+		this.workingMemory = null;
+	}
+
+	public ChoiceRecorder(AtomStore atomStore, WorkingMemory workingMemory) {
+		this.atomStore = atomStore;
+		this.workingMemory = workingMemory;
 	}
 
 	/**
@@ -202,11 +210,14 @@ public class ChoiceRecorder {
 	}
 
 	private List<NoGood> generateHeuristicNoGoodsForNegativeCondition(HeuristicAtom groundHeuristicAtom, int heuristicId, InternalProgram program, Integer[][] influencers) {
+		final boolean hasDynamicAggregate = groundHeuristicAtom.getHasDynamicAggregate();
 		final List<NoGood> noGoods = new ArrayList<>();
 		for (HeuristicDirectiveAtom heuristicDirectiveAtom : groundHeuristicAtom.getOriginalNegativeCondition()) {
 			final Atom atom = heuristicDirectiveAtom.getAtom();
 			final Set<ThriceTruth> signSet = heuristicDirectiveAtom.getSigns();
-
+			if (hasDynamicAggregate && (signSet.contains(ThriceTruth.TRUE) || signSet.contains(ThriceTruth.MBT)) && workingMemory.get(atom, true).containsInstance(Instance.fromAtom(atom))) {
+				return null;
+			}
 			if (program.getFactsByPredicate().isFact(atom)) {
 				if (signSet.contains(ThriceTruth.TRUE) || signSet.contains(ThriceTruth.MBT)) {
 					return null; // heuristic is never applicable
