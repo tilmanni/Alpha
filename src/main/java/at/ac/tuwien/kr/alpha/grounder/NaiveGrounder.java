@@ -44,10 +44,7 @@ import at.ac.tuwien.kr.alpha.common.program.Facts;
 import at.ac.tuwien.kr.alpha.common.program.InternalProgram;
 import at.ac.tuwien.kr.alpha.common.rule.InternalRule;
 import at.ac.tuwien.kr.alpha.common.terms.VariableTerm;
-import at.ac.tuwien.kr.alpha.grounder.atoms.ChoiceAtom;
-import at.ac.tuwien.kr.alpha.grounder.atoms.HeuristicAtom;
-import at.ac.tuwien.kr.alpha.grounder.atoms.HeuristicInfluencerAtom;
-import at.ac.tuwien.kr.alpha.grounder.atoms.RuleAtom;
+import at.ac.tuwien.kr.alpha.grounder.atoms.*;
 import at.ac.tuwien.kr.alpha.grounder.bridges.Bridge;
 import at.ac.tuwien.kr.alpha.grounder.heuristics.GrounderHeuristicsConfiguration;
 import at.ac.tuwien.kr.alpha.grounder.instantiation.AssignmentStatus;
@@ -377,13 +374,10 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 				// Use the recently added instances from the modified working memory to construct an initial substitution
 				InternalRule nonGroundRule = firstBindingAtom.rule;
 
-				if (ignoreDynamicAggregates && nonGroundRule.isHeuristicRule()) {
-					HeuristicAtom headAtom = (HeuristicAtom) nonGroundRule.getHeadAtom();
-					if (headAtom.getHasDynamicAggregate()) {
-						toRemember.add(modifiedWorkingMemory);
-						remembered = true;
-						continue;
-					}
+				if (ignoreDynamicAggregates && nonGroundRule.isHeuristicRule() && nonGroundRule.getHeadAtom() instanceof DynamicHeuristicAtom) {
+					toRemember.add(modifiedWorkingMemory);
+					remembered = true;
+					continue;
 				}
 
 				// Generate substitutions from each recent instance.

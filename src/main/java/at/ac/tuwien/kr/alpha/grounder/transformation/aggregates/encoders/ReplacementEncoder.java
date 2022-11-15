@@ -31,6 +31,9 @@ public class ReplacementEncoder {
 
     private static final ST MAX_MAX_ELEMENT_TUPLE_TEMPLATE = new ST("<id>_max_element_tuple");
 
+    private static final ST MIN_ELEMENT_TUPLE_HAS_SMAllER_TEMPLATE = new ST("<id>_element_tuple_has_smaller");
+    private static final ST MAX_ELEMENT_TUPLE_HAS_GREATER_TEMPLATE = new ST("<id>_element_tuple_has_greater");
+
     private static final ST SUM_PARTIAL_SUM_TEMPLATE = new ST("<id>_<tag>_partial_sum_at_index");
 
     private static final ST SUM_PARTIAL_SUM_HAS_GREATER_TEMPLATE = new ST("<id>_<tag>_partial_sum_has_greater");
@@ -165,11 +168,13 @@ public class ReplacementEncoder {
         List<HeuristicDirectiveAtom> negativeAtoms = new ArrayList<>();
 
         String minElementTupleName = new ST(MIN_MAX_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
-        String minMinElementTupleName = new ST(MIN_MIN_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
+        //String minMinElementTupleName = new ST(MIN_MIN_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
+        String minElementTupleHasSmaller = new ST(MIN_ELEMENT_TUPLE_HAS_SMAllER_TEMPLATE).add("id", id).render();
 
         positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(minElementTupleName, 2, true), argumentTerm, resultTerm)));
 
-        negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_F, new BasicAtom(Predicate.getInstance(minMinElementTupleName, 2, true), argumentTerm, resultTerm)));
+        //negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_F, new BasicAtom(Predicate.getInstance(minMinElementTupleName, 2, true), argumentTerm, resultTerm)));
+        negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_T, new BasicAtom(Predicate.getInstance(minElementTupleHasSmaller, 2, true), argumentTerm, resultTerm)));
 
         Map<String, List<HeuristicDirectiveAtom>> map = new HashMap<>();
         map.put("positive", positiveAtoms);
@@ -193,14 +198,16 @@ public class ReplacementEncoder {
         List<HeuristicDirectiveAtom> negativeAtoms = new ArrayList<>();
 
         String minElementTupleName = new ST(MIN_MAX_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
-        String minMinElementTupleName = new ST(MIN_MIN_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
+        //String minMinElementTupleName = new ST(MIN_MIN_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
+        String minElementTupleHasSmaller = new ST(MIN_ELEMENT_TUPLE_HAS_SMAllER_TEMPLATE).add("id", id).render();
 
         Term currentMin = VariableTerm.getAnonymousInstance();
 
         positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(minElementTupleName, 2, true), argumentTerm, currentMin)));
         positiveAtoms.add(HeuristicDirectiveAtom.body(null, new ComparisonAtom(resultTerm, currentMin, operator)));
 
-        negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_F, new BasicAtom(Predicate.getInstance(minMinElementTupleName, 2, true), argumentTerm, currentMin)));
+        //negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_F, new BasicAtom(Predicate.getInstance(minMinElementTupleName, 2, true), argumentTerm, resultTerm)));
+        negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_T, new BasicAtom(Predicate.getInstance(minElementTupleHasSmaller, 2, true), argumentTerm, currentMin)));
 
         Map<String, List<HeuristicDirectiveAtom>> map = new HashMap<>();
         map.put("positive", positiveAtoms);
@@ -223,11 +230,13 @@ public class ReplacementEncoder {
         List<HeuristicDirectiveAtom> negativeAtoms = new ArrayList<>();
 
         String maxElementTupleName = new ST(MIN_MAX_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
-        String maxMaxElementTupleName = new ST(MAX_MAX_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
+        //String maxMaxElementTupleName = new ST(MAX_MAX_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
+        String maxElementTupleHasGreater = new ST(MAX_ELEMENT_TUPLE_HAS_GREATER_TEMPLATE).add("id", id).render();
 
         positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(maxElementTupleName, 2, true), argumentTerm, resultTerm)));
 
-        negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_F, new BasicAtom(Predicate.getInstance(maxMaxElementTupleName, 2, true), argumentTerm, resultTerm)));
+        //negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_F, new BasicAtom(Predicate.getInstance(maxMaxElementTupleName, 2, true), argumentTerm, resultTerm)));
+        negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_T, new BasicAtom(Predicate.getInstance(maxElementTupleHasGreater, 2, true), argumentTerm, resultTerm)));
 
         Map<String, List<HeuristicDirectiveAtom>> map = new HashMap<>();
         map.put("positive", positiveAtoms);
@@ -251,14 +260,16 @@ public class ReplacementEncoder {
         List<HeuristicDirectiveAtom> negativeAtoms = new ArrayList<>();
 
         String maxElementTupleName = new ST(MIN_MAX_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
-        String maxMaxElementTupleName = new ST(MAX_MAX_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
+        //String maxMaxElementTupleName = new ST(MAX_MAX_ELEMENT_TUPLE_TEMPLATE).add("id", id).render();
+        String maxElementTupleHasGreater = new ST(MAX_ELEMENT_TUPLE_HAS_GREATER_TEMPLATE).add("id", id).render();
 
         Term currentMax = VariableTerm.getAnonymousInstance();
 
         positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(maxElementTupleName, 2, true), argumentTerm, currentMax)));
         positiveAtoms.add(HeuristicDirectiveAtom.body(null, new ComparisonAtom(resultTerm, currentMax, operator)));
 
-        negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_F, new BasicAtom(Predicate.getInstance(maxMaxElementTupleName, 2, true), argumentTerm, currentMax)));
+        //negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_F, new BasicAtom(Predicate.getInstance(maxMaxElementTupleName, 2, true), argumentTerm, resultTerm)));
+        negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_T, new BasicAtom(Predicate.getInstance(maxElementTupleHasGreater, 2, true), argumentTerm, currentMax)));
 
         Map<String, List<HeuristicDirectiveAtom>> map = new HashMap<>();
         map.put("positive", positiveAtoms);

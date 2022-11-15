@@ -35,6 +35,7 @@ import at.ac.tuwien.kr.alpha.common.atoms.Atom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveAtom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveValues;
 import at.ac.tuwien.kr.alpha.common.program.InternalProgram;
+import at.ac.tuwien.kr.alpha.grounder.atoms.DynamicHeuristicAtom;
 import at.ac.tuwien.kr.alpha.grounder.atoms.HeuristicAtom;
 import at.ac.tuwien.kr.alpha.grounder.atoms.HeuristicInfluencerAtom;
 import at.ac.tuwien.kr.alpha.grounder.atoms.RuleAtom;
@@ -210,13 +211,17 @@ public class ChoiceRecorder {
 	}
 
 	private List<NoGood> generateHeuristicNoGoodsForNegativeCondition(HeuristicAtom groundHeuristicAtom, int heuristicId, InternalProgram program, Integer[][] influencers) {
-		final boolean hasDynamicAggregate = groundHeuristicAtom.getHasDynamicAggregate();
+		final boolean hasDynamicAggregate = groundHeuristicAtom instanceof DynamicHeuristicAtom;
 		final List<NoGood> noGoods = new ArrayList<>();
 		for (HeuristicDirectiveAtom heuristicDirectiveAtom : groundHeuristicAtom.getOriginalNegativeCondition()) {
 			final Atom atom = heuristicDirectiveAtom.getAtom();
 			final Set<ThriceTruth> signSet = heuristicDirectiveAtom.getSigns();
-			if (hasDynamicAggregate && (signSet.contains(ThriceTruth.TRUE) || signSet.contains(ThriceTruth.MBT)) && workingMemory.get(atom, true).containsInstance(Instance.fromAtom(atom))) {
-				return null;
+			/*
+				Removes heuristics with dynamic aggregates where negative body is not satisfied preemptively.
+			 */
+			if (hasDynamicAggregate && (signSet.contains(ThriceTruth.TRUE) || signSet.contains(ThriceTruth.MBT))) {
+				if (workingMemory != null && workingMemory.get(atom, true).containsInstance(Instance.fromAtom(atom)))
+					return null;
 			}
 			if (program.getFactsByPredicate().isFact(atom)) {
 				if (signSet.contains(ThriceTruth.TRUE) || signSet.contains(ThriceTruth.MBT)) {

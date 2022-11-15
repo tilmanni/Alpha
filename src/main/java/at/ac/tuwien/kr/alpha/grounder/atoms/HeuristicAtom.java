@@ -76,8 +76,6 @@ public class HeuristicAtom extends Atom {
 	private final FunctionTerm negativeCondition;
 	private final boolean ground;
 
-	private boolean hasDynamicAggregate = false;
-
 	public HeuristicAtom(WeightAtLevel weightAtLevel, ThriceTruth headSign, FunctionTerm headAtom, FunctionTerm positiveCondition, FunctionTerm negativeCondition) {
 		this.weightAtLevel = weightAtLevel;
 		this.headSign = headSign;
@@ -241,13 +239,5 @@ public class HeuristicAtom extends Atom {
 			condition.add(HeuristicDirectiveAtom.body(signSet, toAtom((FunctionTerm)termHeuristicDirectiveAtom.getTerms().get(0))));
 		}
 		return condition;
-	}
-
-	public void setHasDynamicAggregate(boolean hasDynamicAggregate) {
-		this.hasDynamicAggregate = hasDynamicAggregate;
-	}
-
-	public boolean getHasDynamicAggregate() {
-		return hasDynamicAggregate;
 	}
 }

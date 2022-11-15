@@ -41,6 +41,7 @@ import at.ac.tuwien.kr.alpha.common.atoms.FixedInterpretationLiteral;
 import at.ac.tuwien.kr.alpha.common.atoms.Literal;
 import at.ac.tuwien.kr.alpha.common.program.InternalProgram;
 import at.ac.tuwien.kr.alpha.common.rule.InternalRule;
+import at.ac.tuwien.kr.alpha.grounder.atoms.DynamicHeuristicAtom;
 import at.ac.tuwien.kr.alpha.grounder.atoms.EnumerationAtom;
 import at.ac.tuwien.kr.alpha.grounder.atoms.HeuristicAtom;
 import at.ac.tuwien.kr.alpha.grounder.atoms.RuleAtom;
@@ -80,7 +81,7 @@ public class NoGoodGenerator {
 	 */
 	Collection<NoGood> generateNoGoodsFromGroundSubstitution(final InternalRule nonGroundRule, final Substitution substitution) {
 		final boolean isHeuristicRule = nonGroundRule.getHeadAtom() instanceof HeuristicAtom;
-		final boolean hasDynamicAggregate = isHeuristicRule && ((HeuristicAtom) nonGroundRule.getHeadAtom()).getHasDynamicAggregate(); //TODO Change this abomination somehow
+		final boolean hasDynamicAggregate = nonGroundRule.getHeadAtom() instanceof DynamicHeuristicAtom; //TODO Change this abomination somehow
 		final List<Integer> posLiterals = collectPosLiterals(nonGroundRule, substitution);
 		final List<Integer> negLiterals = collectNegLiterals(nonGroundRule, substitution);
 
@@ -105,9 +106,7 @@ public class NoGoodGenerator {
 		}
 
 		if (isHeuristicRule) {
-			HeuristicAtom groundHeuristicHeadAtom = (HeuristicAtom) groundHeadAtom;
-			groundHeuristicHeadAtom.setHasDynamicAggregate(hasDynamicAggregate);
-			return generateNoGoodsForHeuristicRule(groundHeuristicHeadAtom, bodyAtom);
+			return generateNoGoodsForHeuristicRule((HeuristicAtom) groundHeadAtom, bodyAtom);
 		} else {
 			return generateNoGoodsForNonConstraintNonHeuristicRule(nonGroundRule, posLiterals, negLiterals, groundHeadAtom, bodyAtom);
 		}
