@@ -42,6 +42,7 @@ import at.ac.tuwien.kr.alpha.common.atoms.Literal;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveValues;
 import at.ac.tuwien.kr.alpha.common.program.Facts;
 import at.ac.tuwien.kr.alpha.common.program.InternalProgram;
+import at.ac.tuwien.kr.alpha.common.prolog.PrologModule;
 import at.ac.tuwien.kr.alpha.common.rule.InternalRule;
 import at.ac.tuwien.kr.alpha.common.terms.VariableTerm;
 import at.ac.tuwien.kr.alpha.grounder.atoms.ChoiceAtom;
@@ -144,6 +145,10 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 				this.grounderHeuristicsConfiguration.isAccumulatorEnabled());
 		this.instantiationStrategy.setStaleWorkingMemoryEntries(this.removeAfterObtainingNewNoGoods);
 		this.ruleInstantiator = new LiteralInstantiator(this.instantiationStrategy);
+
+		PrologModule.addFacts(factsFromProgram);
+		PrologModule.setAtomStore(atomStore);
+
 	}
 
 	private void initializeFactsAndRules() {
@@ -258,7 +263,6 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 	public AnswerSet assignmentToAnswerSet(Iterable<Integer> trueAtoms) {
 		Map<Predicate, SortedSet<Atom>> predicateInstances = new LinkedHashMap<>();
 		SortedSet<Predicate> knownPredicates = new TreeSet<>();
-
 		// Iterate over all true atomIds, computeNextAnswerSet instances from atomStore and add them if not filtered.
 		for (int trueAtom : trueAtoms) {
 			final Atom atom = atomStore.get(trueAtom);
