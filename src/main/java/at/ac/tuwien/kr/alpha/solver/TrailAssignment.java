@@ -33,7 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import at.ac.tuwien.kr.alpha.common.prolog.PrologModule;
+import at.ac.tuwien.kr.alpha.grounder.NaiveGrounder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,14 +236,14 @@ public class TrailAssignment implements WritableAssignment, Checkable {
 					throw oops("Backtracking assignment with lower decision level whose value is not TRUE.");
 				}
 				values[backtrackAtom] = (getWeakDecisionLevel(backtrackAtom) << 2) | translateTruth(MBT);
-				PrologModule.removeAtom(backtrackAtom);
+				NaiveGrounder.getPrologModuleInstance().removeAtom(backtrackAtom);
 				mbtCount++;
 			} else {
 				if (getTruth(backtrackAtom) == MBT) {
 					mbtCount--;
 				}
 				if (getTruth(backtrackAtom) == TRUE) {
-					PrologModule.removeAtom(backtrackAtom);
+					NaiveGrounder.getPrologModuleInstance().removeAtom(backtrackAtom);
 				}
 				values[backtrackAtom] = 0;
 			}
@@ -379,7 +379,7 @@ public class TrailAssignment implements WritableAssignment, Checkable {
 			}
 			if (value == TRUE) {
 				strongDecisionLevels[atom] = getDecisionLevel();
-				PrologModule.addAtom(atom);
+				NaiveGrounder.getPrologModuleInstance().addAtom(atom);
 			}
 			if (impliedBy != CLOSING_INDICATOR_ANTECEDENT) {
 				// we assume that callbacks need not be informed during closing
@@ -420,7 +420,7 @@ public class TrailAssignment implements WritableAssignment, Checkable {
 			mbtCount--;
 			informCallback(atom);
 			didChange = true;
-			PrologModule.addAtom(atom);
+			NaiveGrounder.getPrologModuleInstance().addAtom(atom);
 			return null;
 		}
 		throw oops("Assignment conditions are not covered.");

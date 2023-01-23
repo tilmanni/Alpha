@@ -43,6 +43,8 @@ import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveValues;
 import at.ac.tuwien.kr.alpha.common.program.Facts;
 import at.ac.tuwien.kr.alpha.common.program.InternalProgram;
 import at.ac.tuwien.kr.alpha.common.prolog.PrologModule;
+import at.ac.tuwien.kr.alpha.common.prolog.PrologTest;
+import at.ac.tuwien.kr.alpha.common.prolog.SWIPLPrologModule;
 import at.ac.tuwien.kr.alpha.common.rule.InternalRule;
 import at.ac.tuwien.kr.alpha.common.terms.VariableTerm;
 import at.ac.tuwien.kr.alpha.grounder.atoms.ChoiceAtom;
@@ -111,6 +113,8 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 	private final LiteralInstantiator ruleInstantiator;
 	private final DefaultLazyGroundingInstantiationStrategy instantiationStrategy;
 
+	private static PrologModule prologModule = null;
+
 	public NaiveGrounder(InternalProgram program, AtomStore atomStore, HeuristicsConfiguration heuristicsConfiguration, boolean debugInternalChecks, Bridge... bridges) {
 		this(program, atomStore, heuristicsConfiguration, new GrounderHeuristicsConfiguration(), debugInternalChecks, bridges);
 	}
@@ -146,8 +150,9 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 		this.instantiationStrategy.setStaleWorkingMemoryEntries(this.removeAfterObtainingNewNoGoods);
 		this.ruleInstantiator = new LiteralInstantiator(this.instantiationStrategy);
 
-		PrologModule.addFacts(factsFromProgram);
-		PrologModule.setAtomStore(atomStore);
+		PrologModule prologModule = NaiveGrounder.getPrologModuleInstance();
+		prologModule.addFacts(factsFromProgram);
+		prologModule.setAtomStore(atomStore);
 
 	}
 
@@ -263,6 +268,9 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 	public AnswerSet assignmentToAnswerSet(Iterable<Integer> trueAtoms) {
 		Map<Predicate, SortedSet<Atom>> predicateInstances = new LinkedHashMap<>();
 		SortedSet<Predicate> knownPredicates = new TreeSet<>();
+
+		PrologTest.test3();
+
 		// Iterate over all true atomIds, computeNextAnswerSet instances from atomStore and add them if not filtered.
 		for (int trueAtom : trueAtoms) {
 			final Atom atom = atomStore.get(trueAtom);
@@ -695,6 +703,14 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 			this.rule = rule;
 			this.startingLiteral = startingLiteral;
 		}
+	}
+
+
+	public static PrologModule getPrologModuleInstance() {
+		if (prologModule == null) {
+			prologModule = new SWIPLPrologModule();
+		}
+		return prologModule;
 	}
 
 }
