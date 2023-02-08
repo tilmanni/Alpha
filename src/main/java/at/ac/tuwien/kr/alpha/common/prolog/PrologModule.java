@@ -3,6 +3,9 @@ package at.ac.tuwien.kr.alpha.common.prolog;
 import at.ac.tuwien.kr.alpha.common.AtomStore;
 import at.ac.tuwien.kr.alpha.common.program.Facts;
 
+import java.util.List;
+import java.util.Map;
+
 public interface PrologModule {
 
 
@@ -17,6 +20,8 @@ public interface PrologModule {
     boolean poseQuery(String query);
 
     String poseQueryGetResult(String query, String result);
+
+    List<Map<String, String>> poseQueryGetResults(String query, String[] results);
 
     long getAddTime();
 

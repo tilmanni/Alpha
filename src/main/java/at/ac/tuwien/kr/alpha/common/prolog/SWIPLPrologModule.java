@@ -9,8 +9,7 @@ import at.ac.tuwien.kr.alpha.grounder.Instance;
 import org.jpl7.*;
 
 import java.lang.Integer;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 //TODO Class is  (for convenience) should be changed to be instance later.
 
@@ -41,15 +40,14 @@ public class SWIPLPrologModule implements PrologModule {
 
 
     public  void addFacts(Facts factsFromProgram) {
-        long startTime = System.nanoTime();
         for (Map.Entry<Predicate, ? extends Set<Instance>> facts : factsFromProgram.entrySet()) {
             Predicate factPredicate = facts.getKey();
-            poseQuery("dynamic " + factPredicate);
+            //poseQuery("dynamic " + factPredicate);
             for (Instance factInstance : facts.getValue()) {
                 addAtom(new BasicAtom(factPredicate, factInstance.terms));
             }
         }
-        addTime += System.nanoTime() - startTime;
+
     }
 
     public  void setAtomStore(AtomStore atomStore) {
@@ -141,14 +139,40 @@ public class SWIPLPrologModule implements PrologModule {
 
     public  String poseQueryGetResult(String query, String result) {
         long startTime = System.nanoTime();
+        StringBuilder sb = new StringBuilder();
         Term term = Term.textToTerm(query);
         Query q = new Query(term);
+        while (q.hasNext()) {
+            Map<String, Term> binding = q.next();
+            sb.append(binding.get(result).toString());
+            sb.append("\n");
+        }
+        qTime += System.nanoTime() - startTime;
+        return sb.toString();
+        /*
         if (q.hasNext()) {
             Map<String, Term> binding = q.next();
             qTime += System.nanoTime() - startTime;
             return binding.get(result).toString();
         }
-        return null;
+        return null;*/
+    }
+    @Override
+    public List<Map<String, String>> poseQueryGetResults(String query, String[] results) {
+        long startTime = System.nanoTime();
+        Term term = Term.textToTerm(query);
+        Query q = new Query(term);
+        ArrayList<Map<String, String>> query_results = new ArrayList<>();
+        while (q.hasNext()) {
+            Map<String, String> solution = new HashMap<>();
+            Map<String, Term> binding = q.next();
+            for (String result : results) {
+                solution.put(result, binding.get(result).toString());
+            }
+            query_results.add(solution);
+        }
+        qTime += System.nanoTime() - startTime;
+        return query_results;
     }
 
     @Override
