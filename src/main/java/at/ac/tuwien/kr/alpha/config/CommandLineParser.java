@@ -153,6 +153,10 @@ public class CommandLineParser {
 	private static final Option OPT_IGNORE_DOMSPEC_HEURISTICS = Option.builder("ids").longOpt("ignoreDomSpecHeuristics")
 			.desc("ignore domain-specific heuristics defined via heuristic directives (default: " + SystemConfig.DEFAULT_IGNORE_DOMSPEC_HEURISTICS + ")")
 			.build();
+	private static final Option OPT_USE_QUERY_HEURISTICS = Option.builder("uqh").longOpt("useQueryHeuristics")
+			.desc("process domain-specific heuristics defined via heuristic directives using prolog queries, instead of the standard no-good driven approach" +
+					"(default: " + SystemConfig.DEFAULT_USE_QUERY_HEURISTICS + ")")
+			.build();
 	//@formatter:on
 
 	private static final Options CLI_OPTS = new Options();
@@ -196,6 +200,7 @@ public class CommandLineParser {
 		CommandLineParser.CLI_OPTS.addOption(CommandLineParser.OPT_GROUNDER_ACCUMULATOR_ENABLED);
 		CommandLineParser.CLI_OPTS.addOption(CommandLineParser.OPT_OUTPUT_ATOM_SEPARATOR);
 		CommandLineParser.CLI_OPTS.addOption(CommandLineParser.OPT_IGNORE_DOMSPEC_HEURISTICS);
+		CommandLineParser.CLI_OPTS.addOption(CommandLineParser.OPT_USE_QUERY_HEURISTICS);
 	}
 
 	/*
@@ -254,6 +259,7 @@ public class CommandLineParser {
 		this.globalOptionHandlers.put(CommandLineParser.OPT_GROUNDER_ACCUMULATOR_ENABLED.getOpt(), this::handleGrounderNoInstanceRemoval);
 		this.globalOptionHandlers.put(CommandLineParser.OPT_OUTPUT_ATOM_SEPARATOR.getOpt(), this::handleAtomSeparator);
 		this.globalOptionHandlers.put(CommandLineParser.OPT_IGNORE_DOMSPEC_HEURISTICS.getOpt(), this::handleIgnoreDomspecHeuristic);
+		this.globalOptionHandlers.put(CommandLineParser.OPT_USE_QUERY_HEURISTICS.getOpt(), this::handleUseQueryHeuristics);
 	}
 
 	private void initializeInputOptionHandlers() {
@@ -498,5 +504,7 @@ public class CommandLineParser {
 	private void handleIgnoreDomspecHeuristic(Option opt, SystemConfig cfg) {
 		cfg.setIgnoreDomspecHeuristics(true);
 	}
+
+	private void handleUseQueryHeuristics(Option opt, SystemConfig cfg) {cfg.setUseQueryHeuristics(true);}
 
 }
