@@ -64,6 +64,10 @@ public class ComparisonAtom extends Atom implements VariableNormalizableAtom {
 		return terms;
 	}
 
+	public ComparisonOperator getOperator() {
+		return  operator;
+	}
+
 	@Override
 	public boolean isGround() {
 		return terms.get(0).isGround() && terms.get(1).isGround();
