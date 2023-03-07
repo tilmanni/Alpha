@@ -124,7 +124,7 @@ public class Alpha {
 	}
 
 	public NormalProgram normalizeProgram(InputProgram program) {
-		return new NormalizeProgramTransformation(config.getAggregateRewritingConfig(), config.isIgnoreDomspecHeuristics()).apply(program);
+		return new NormalizeProgramTransformation(config.getAggregateRewritingConfig(), config.isIgnoreDomspecHeuristics(), config.isUseQueryHeuristics()).apply(program);
 	}
 
 	public InternalProgram performProgramPreprocessing(InternalProgram program) {
@@ -224,7 +224,8 @@ public class Alpha {
 		heuristicsConfigurationBuilder.setHeuristic(this.config.getBranchingHeuristic());
 		heuristicsConfigurationBuilder.setMomsStrategy(this.config.getMomsStrategy());
 		final boolean existsHeuristicRule = program.existsHeuristicRule();
-		heuristicsConfigurationBuilder.setRespectDomspecHeuristics(!this.config.isIgnoreDomspecHeuristics() && existsHeuristicRule);
+		heuristicsConfigurationBuilder.setRespectDomspecHeuristics(!this.config.isIgnoreDomspecHeuristics() && (existsHeuristicRule || this.config.isUseQueryHeuristics())); //had to change requirements as query rewriting removes heuristic rules
+		heuristicsConfigurationBuilder.setUseQueryHeuristics(this.config.isUseQueryHeuristics());
 		heuristicsConfigurationBuilder.setReplayChoices(this.config.getReplayChoices());
 		return heuristicsConfigurationBuilder.build();
 	}

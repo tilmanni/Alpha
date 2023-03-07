@@ -41,7 +41,8 @@ public final class SolverFactory {
 		final String nogoodStoreName = config.getNogoodStoreName();
 		final Random random = new Random(config.getSeed());
 		final boolean debugInternalChecks = config.isDebugInternalChecks();
-		final TrailAssignment assignment = new TrailAssignment(atomStore, debugInternalChecks);
+		final boolean useQueryHeuristics = heuristicsConfiguration.isUseQueryHeuristics();
+		final TrailAssignment assignment = new TrailAssignment(atomStore, debugInternalChecks, useQueryHeuristics);
 		assignment.setChecksEnabled(debugInternalChecks);
 
 		NoGoodStore store;

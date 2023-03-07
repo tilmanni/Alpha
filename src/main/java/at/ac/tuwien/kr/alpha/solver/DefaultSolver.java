@@ -116,7 +116,11 @@ public class DefaultSolver extends AbstractSolver implements SolverMaintainingSt
 		this.store = store;
 
 		if (heuristicsConfiguration.isRespectDomspecHeuristics()) {
-			this.choiceManager = ChoiceManager.withDomainSpecificHeuristics(assignment, store);
+			if (heuristicsConfiguration.isUseQueryHeuristics()) {
+				this.choiceManager = ChoiceManager.withDomainSpecificHeuristicsAndQueries(assignment, store);
+			} else {
+				this.choiceManager = ChoiceManager.withDomainSpecificHeuristics(assignment, store);
+			}
 		} else {
 			this.choiceManager = ChoiceManager.withoutDomainSpecificHeuristics(assignment, store);
 		}

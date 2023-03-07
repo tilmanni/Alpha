@@ -37,6 +37,8 @@ public class HeuristicsConfigurationBuilder {
 
 	private Heuristic heuristic;
 	private boolean respectDomspecHeuristics = true;
+
+	private boolean useQueryHeuristics = false;
 	private BinaryNoGoodPropagationEstimation.Strategy momsStrategy;
 	private List<Integer> replayChoices;
 
@@ -50,6 +52,11 @@ public class HeuristicsConfigurationBuilder {
 
 	public HeuristicsConfigurationBuilder setRespectDomspecHeuristics(boolean respectDomspecHeuristics) {
 		this.respectDomspecHeuristics = respectDomspecHeuristics;
+		return this;
+	}
+
+	public HeuristicsConfigurationBuilder setUseQueryHeuristics(boolean useQueryHeuristics) {
+		this.useQueryHeuristics = useQueryHeuristics;
 		return this;
 	}
 
@@ -70,6 +77,6 @@ public class HeuristicsConfigurationBuilder {
 	}
 
 	public HeuristicsConfiguration build() {
-		return new HeuristicsConfiguration(heuristic, respectDomspecHeuristics, momsStrategy, replayChoices);
+		return new HeuristicsConfiguration(heuristic, respectDomspecHeuristics, useQueryHeuristics, momsStrategy, replayChoices);
 	}
 }

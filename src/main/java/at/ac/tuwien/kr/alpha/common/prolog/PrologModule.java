@@ -2,6 +2,7 @@ package at.ac.tuwien.kr.alpha.common.prolog;
 
 import at.ac.tuwien.kr.alpha.common.AtomStore;
 import at.ac.tuwien.kr.alpha.common.program.Facts;
+import at.ac.tuwien.kr.alpha.common.terms.VariableTerm;
 
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ public interface PrologModule {
 
     String poseQueryGetResult(String query, String result);
 
-    List<Map<String, String>> poseQueryGetResults(String query, String[] results);
+    List<Map<String, String>> poseQueryGetResults(String query, VariableTerm[] results);
 
     long getAddTime();
 

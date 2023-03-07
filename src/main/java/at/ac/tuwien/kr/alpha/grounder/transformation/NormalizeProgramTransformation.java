@@ -44,9 +44,12 @@ public class NormalizeProgramTransformation extends ProgramTransformation<InputP
 	private final AggregateRewritingConfig aggregateRewritingCfg;
 	private final boolean ignoreDomspecHeuristics;
 
-	public NormalizeProgramTransformation(AggregateRewritingConfig aggregateCfg, boolean ignoreDomspecHeuristics) {
+	private final boolean useQueryHeuristics;
+
+	public NormalizeProgramTransformation(AggregateRewritingConfig aggregateCfg, boolean ignoreDomspecHeuristics, boolean useQueryHeuristics) {
 		this.aggregateRewritingCfg = aggregateCfg;
 		this.ignoreDomspecHeuristics = ignoreDomspecHeuristics;
+		this.useQueryHeuristics = useQueryHeuristics;
 	}
 
 	@Override
@@ -60,6 +63,8 @@ public class NormalizeProgramTransformation extends ProgramTransformation<InputP
 		tmpPrg = new SignSetTransformation().apply(tmpPrg);
 		// Copy bodies of head-deriving rules to conditions of heuristic directives.
 		tmpPrg = new HeuristicDirectiveConditionEnhancement(!this.ignoreDomspecHeuristics).apply(tmpPrg);
+		// Translates heuristic directives to query.
+		tmpPrg = new HeuristicDirectiveToQuery(!this.ignoreDomspecHeuristics, this.useQueryHeuristics).apply(tmpPrg);
 		// Translate heuristic directives to rules.
 		tmpPrg = new HeuristicDirectiveToRule(!this.ignoreDomspecHeuristics).apply(tmpPrg);
 		// Transform cardinality aggregates.

@@ -37,19 +37,15 @@ public class HeuristicsConfiguration {
 
 	private final Heuristic heuristic;
 	private final boolean respectDomspecHeuristics;
+	private final boolean useQueryHeuristics;
 	private final Strategy momsStrategy;
 	private final List<Integer> replayChoices;
 
-	/**
-	 * @param heuristic
-	 * @param respectDomspecHeuristics
-	 * @param momsStrategy
-	 * @param replayChoices
-	 */
-	public HeuristicsConfiguration(Heuristic heuristic, boolean respectDomspecHeuristics, Strategy momsStrategy, List<Integer> replayChoices) {
+	public HeuristicsConfiguration(Heuristic heuristic, boolean respectDomspecHeuristics, boolean useQueryHeuristics, Strategy momsStrategy, List<Integer> replayChoices) {
 		super();
 		this.heuristic = heuristic;
 		this.respectDomspecHeuristics = respectDomspecHeuristics;
+		this.useQueryHeuristics = useQueryHeuristics;
 		this.momsStrategy = momsStrategy;
 		this.replayChoices = replayChoices;
 	}
@@ -60,6 +56,10 @@ public class HeuristicsConfiguration {
 
 	public boolean isRespectDomspecHeuristics() {
 		return respectDomspecHeuristics;
+	}
+
+	public boolean isUseQueryHeuristics() {
+		return useQueryHeuristics;
 	}
 
 	/**

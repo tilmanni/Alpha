@@ -43,7 +43,7 @@ import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveValues;
 import at.ac.tuwien.kr.alpha.common.program.Facts;
 import at.ac.tuwien.kr.alpha.common.program.InternalProgram;
 import at.ac.tuwien.kr.alpha.common.prolog.PrologModule;
-import at.ac.tuwien.kr.alpha.common.prolog.PrologTest;
+import at.ac.tuwien.kr.alpha.common.prolog.QueryInformationStorage;
 import at.ac.tuwien.kr.alpha.common.prolog.SWIPLPrologModule;
 import at.ac.tuwien.kr.alpha.common.rule.InternalRule;
 import at.ac.tuwien.kr.alpha.common.terms.VariableTerm;
@@ -150,9 +150,15 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 		this.instantiationStrategy.setStaleWorkingMemoryEntries(this.removeAfterObtainingNewNoGoods);
 		this.ruleInstantiator = new LiteralInstantiator(this.instantiationStrategy);
 
-		PrologModule prologModule = NaiveGrounder.getPrologModuleInstance();
-		prologModule.addFacts(factsFromProgram);
-		prologModule.setAtomStore(atomStore);
+
+		if (heuristicsConfiguration.isUseQueryHeuristics()) {
+			PrologModule prologModule = NaiveGrounder.getPrologModuleInstance();
+			prologModule.addFacts(factsFromProgram);
+			prologModule.setAtomStore(atomStore);
+			QueryInformationStorage.setAtomStore(atomStore);
+			QueryInformationStorage.updateInformation();
+		}
+
 
 	}
 
@@ -269,7 +275,6 @@ public class NaiveGrounder extends BridgedGrounder implements ProgramAnalyzingGr
 		Map<Predicate, SortedSet<Atom>> predicateInstances = new LinkedHashMap<>();
 		SortedSet<Predicate> knownPredicates = new TreeSet<>();
 
-		PrologTest.test3();
 
 		// Iterate over all true atomIds, computeNextAnswerSet instances from atomStore and add them if not filtered.
 		for (int trueAtom : trueAtoms) {

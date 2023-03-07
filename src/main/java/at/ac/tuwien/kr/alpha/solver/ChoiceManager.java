@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+import at.ac.tuwien.kr.alpha.solver.heuristics.domspec.QueryDomainSpecificHeuristicsStore;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -313,6 +314,10 @@ public class ChoiceManager implements Checkable {
 
 	static ChoiceManager withDomainSpecificHeuristics(WritableAssignment assignment, NoGoodStore store) {
 		return new ChoiceManager(assignment, store);
+	}
+
+	static ChoiceManager withDomainSpecificHeuristicsAndQueries(WritableAssignment assignment, NoGoodStore store) {
+		return new ChoiceManager(assignment, store, new QueryDomainSpecificHeuristicsStore());
 	}
 
 	/**
