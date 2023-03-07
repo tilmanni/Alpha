@@ -2,12 +2,11 @@ package at.ac.tuwien.kr.alpha.common.prolog;
 
 
 import at.ac.tuwien.kr.alpha.common.AtomStore;
-import at.ac.tuwien.kr.alpha.common.HeuristicDirective;
-import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveValues;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
+import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveValues;
+import at.ac.tuwien.kr.alpha.grounder.NaiveGrounder;
+
+import java.util.*;
 
 
 /**
@@ -25,6 +24,10 @@ public class QueryInformationStorage {
 
     private static AtomStore atomStore = null;
 
+    private static final Set<String> occurringPredicates = new HashSet<>();
+
+    private static boolean dynamicPredicatesInitialized = false;
+
 
 
 
@@ -35,11 +38,15 @@ public class QueryInformationStorage {
 
     public static void addQueryInformation(QueryInformation queryInformationToAdd) {
         queryInformation.add(queryInformationToAdd);
+        occurringPredicates.addAll(queryInformationToAdd.getOccurringPredicates());
     }
 
     public static void updateInformation() {
         if (atomStore == null) {
             return;
+        }
+        if (!dynamicPredicatesInitialized) {
+            initializeDynamicPredicates();
         }
         for(QueryInformation queryInformationToUpdate : queryInformation) {
             queryInformationToUpdate.updateResults(atomStore);
@@ -79,5 +86,13 @@ public class QueryInformationStorage {
 
     public static void setAtomStore(AtomStore atomStore) {
         QueryInformationStorage.atomStore = atomStore;
+    }
+
+    private static void initializeDynamicPredicates() {
+        PrologModule prologModule = NaiveGrounder.getPrologModuleInstance();
+        for (String predicate : occurringPredicates) {
+            prologModule.poseQuery("dynamic " + predicate);
+        }
+        dynamicPredicatesInitialized = true;
     }
 }

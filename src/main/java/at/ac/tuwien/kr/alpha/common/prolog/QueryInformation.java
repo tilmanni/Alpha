@@ -28,6 +28,8 @@ public class QueryInformation {
 
     private final VariableTerm[] variables;
 
+    private final Set<String> occurringPredicates;
+
     private final String stringQuery;
 
     private List<HeuristicDirectiveValues> queryResults;
@@ -50,6 +52,19 @@ public class QueryInformation {
         this.variables[counter++] = levelVariableTerm;
         for (VariableTerm variableTerm : headAtomVariables) {
             this.variables[counter++] = variableTerm;
+        }
+
+        this.occurringPredicates = new HashSet<>();
+        this.occurringPredicates.add(heuristicDirective.getHead().getAtom().getPredicate().toString());
+        for (HeuristicDirectiveAtom positiveHeuristicDirectiveAtom : heuristicDirective.getBody().getBodyAtomsPositive()) {
+            if (positiveHeuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
+                this.occurringPredicates.add(positiveHeuristicDirectiveAtom.getAtom().getPredicate().toString());
+            }
+        }
+        for (HeuristicDirectiveAtom negativeHeuristicDirectiveAtom : heuristicDirective.getBody().getBodyAtomsNegative()) {
+            if (negativeHeuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
+                this.occurringPredicates.add(negativeHeuristicDirectiveAtom.getAtom().getPredicate().toString());
+            }
         }
 
         this.stringQuery = ASPtoQueryTranslator.translateHeuristicDirective(heuristicDirective, weightVariableTerm, levelVariableTerm);
@@ -93,4 +108,7 @@ public class QueryInformation {
         return this.queryResults;
     }
 
+    public Set<String> getOccurringPredicates() {
+        return this.occurringPredicates;
+    }
 }
