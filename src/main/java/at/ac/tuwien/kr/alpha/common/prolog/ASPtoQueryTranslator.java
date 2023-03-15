@@ -8,9 +8,7 @@ import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveAtom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveBody;
 import at.ac.tuwien.kr.alpha.common.terms.VariableTerm;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.join;
 
@@ -56,7 +54,8 @@ public class ASPtoQueryTranslator {
 
     private static String translateHeuristicDirectiveBody(HeuristicDirectiveBody heuristicDirectiveBodyToTranslate) {
         StringJoiner stringJoiner = new StringJoiner(", ");
-        for (HeuristicDirectiveAtom positiveHeuristicDirectiveAtom : heuristicDirectiveBodyToTranslate.getBodyAtomsPositive()) {
+        Collection<HeuristicDirectiveAtom> positiveBodySorted = sortHeuristicDirectiveBody(heuristicDirectiveBodyToTranslate.getBodyAtomsPositive());
+        for (HeuristicDirectiveAtom positiveHeuristicDirectiveAtom : positiveBodySorted) {
             stringJoiner.add(translateHeuristicDirectiveAtom(positiveHeuristicDirectiveAtom));
         }
         for (HeuristicDirectiveAtom negativeHeuristicDirectiveAtom : heuristicDirectiveBodyToTranslate.getBodyAtomsNegative()) {
@@ -201,4 +200,132 @@ public class ASPtoQueryTranslator {
      External atoms not supported.
      */
 
+    private static List<HeuristicDirectiveAtom> sortHeuristicDirectiveBody(Collection<HeuristicDirectiveAtom> heuristicDirectiveBodyToSort) {
+        List<HeuristicDirectiveAtom> orderedBody = new ArrayList<>();
+        LinkedList<HeuristicDirectiveAtom> queue = new LinkedList<>();
+        Set<VariableTerm> globalVariables = new HashSet<>();
+
+        Set<VariableTerm> positivelyOccurringGlobalVariables = new HashSet<>();
+
+
+
+        for (HeuristicDirectiveAtom heuristicDirectiveAtom : heuristicDirectiveBodyToSort) {
+            if (heuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
+                positivelyOccurringGlobalVariables.addAll(heuristicDirectiveAtom.getAtom().getOccurringVariables());
+                orderedBody.add(heuristicDirectiveAtom);
+            }
+            else {
+                queue.add(heuristicDirectiveAtom);
+            }
+            globalVariables.addAll(getGlobalVariables(heuristicDirectiveAtom));
+        }
+
+        while(!queue.isEmpty()) {
+            HeuristicDirectiveAtom heuristicDirectiveAtom = queue.poll();
+            IsCoveredPair isCoveredPair = isCovered(heuristicDirectiveAtom, positivelyOccurringGlobalVariables, globalVariables);
+            if (isCoveredPair.isCovered) {
+                if (isCoveredPair.assignedVariable != null) {
+                    positivelyOccurringGlobalVariables.add(isCoveredPair.assignedVariable);
+                }
+                orderedBody.add(heuristicDirectiveAtom);
+            }
+            else {
+                queue.add(heuristicDirectiveAtom);
+            }
+        }
+        return orderedBody;
+
+
+
+
+
+
+
+    }
+
+
+
+    private static Set<VariableTerm> getGlobalVariables(HeuristicDirectiveAtom heuristicDirectiveAtom) {
+        if (heuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
+            Set<VariableTerm> globalVariables = new HashSet<>();
+            AggregateAtom aggregateAtom = (AggregateAtom) heuristicDirectiveAtom.getAtom();
+            if(aggregateAtom.getLowerBoundTerm() != null) {
+                globalVariables.addAll(aggregateAtom.getLowerBoundTerm().getOccurringVariables());
+            }
+            if(aggregateAtom.getUpperBoundTerm() != null) {
+                globalVariables.addAll(aggregateAtom.getUpperBoundTerm().getOccurringVariables());
+            }
+            return globalVariables;
+        }
+        return heuristicDirectiveAtom.getAtom().getOccurringVariables();
+    }
+
+    private static IsCoveredPair isCovered(HeuristicDirectiveAtom heuristicDirectiveAtom, Set<VariableTerm> positivelyOccurringVariables, Set<VariableTerm> globalVariables) {
+        Atom atom = heuristicDirectiveAtom.getAtom();
+        if (atom instanceof ComparisonAtom) {
+            return isCoveredCompAtom((ComparisonAtom) atom, positivelyOccurringVariables);
+        }
+        else if (atom instanceof AggregateAtom) {
+            return isCoveredAggAtom((AggregateAtom) atom, positivelyOccurringVariables, globalVariables);
+        }
+        return new IsCoveredPair(false, null);
+    }
+    private static IsCoveredPair isCoveredCompAtom(ComparisonAtom comparisonAtom, Set<VariableTerm> positivelyOccurringVariables) {
+        VariableTerm assignedVariable = null;
+        for (VariableTerm variableTerm : comparisonAtom.getOccurringVariables()) {
+            if (!positivelyOccurringVariables.contains(variableTerm)) {
+                if (assignedVariable == null && comparisonAtom.getOperator().equals(ComparisonOperator.EQ)) {
+                    assignedVariable = variableTerm;
+                } else {
+                    return new IsCoveredPair(false, null);
+                }
+            }
+        }
+        return new IsCoveredPair(true, assignedVariable);
+    }
+
+    private static IsCoveredPair isCoveredAggAtom(AggregateAtom aggregateAtom, Set<VariableTerm> positivelyOccurringVariables, Set<VariableTerm> globalVariables) {
+        VariableTerm assignedVariable = null;
+        for (VariableTerm variableTerm : aggregateAtom.getAggregateVariables()) {
+            if (globalVariables.contains(variableTerm) && !positivelyOccurringVariables.contains(variableTerm)) {
+                return new IsCoveredPair(false, null);
+            }
+        }
+        if (aggregateAtom.getUpperBoundTerm() != null) {
+            for (VariableTerm variableTerm : aggregateAtom.getUpperBoundTerm().getOccurringVariables()) {
+                if (!positivelyOccurringVariables.contains(variableTerm)) {
+                    if (assignedVariable == null && aggregateAtom.getUpperBoundOperator().equals(ComparisonOperator.EQ)) {
+                        assignedVariable = variableTerm;
+                    } else {
+                        return new IsCoveredPair(false, null);
+                    }
+                }
+            }
+        }
+        if (aggregateAtom.getLowerBoundTerm() != null) {
+            for (VariableTerm variableTerm : aggregateAtom.getLowerBoundTerm().getOccurringVariables()) {
+                if (!positivelyOccurringVariables.contains(variableTerm)) {
+                    if (assignedVariable == null && aggregateAtom.getLowerBoundOperator().equals(ComparisonOperator.EQ)) {
+                        assignedVariable = variableTerm;
+                    } else {
+                        return new IsCoveredPair(false, null);
+                    }
+                }
+            }
+        }
+
+
+        return new IsCoveredPair(true, assignedVariable);
+
+    }
+
+
+    private static class IsCoveredPair {
+        final boolean isCovered;
+        final VariableTerm assignedVariable;
+        public IsCoveredPair(boolean isCovered, VariableTerm assignedVariable) {
+            this.isCovered = isCovered;
+            this.assignedVariable = assignedVariable;
+        }
+    }
 }
