@@ -58,7 +58,7 @@ public class QueryInformationStorage {
         The workaround with the results ArrayList is (currently) necessary, as the PriorityQueue must have a fixed capacity,
         which we might not know beforehand.
     */
-    public static PriorityQueue<HeuristicDirectiveValues> getQueryResults() {
+    public static List<HeuristicDirectiveValues> getQueryResults() {
         if (atomStore == null) {
             return null;
         }
@@ -67,9 +67,9 @@ public class QueryInformationStorage {
             queryInformationToGetResultsFrom.updateResults(atomStore);
             results.addAll(queryInformationToGetResultsFrom.getQueryResults());
         }
-        PriorityQueue<HeuristicDirectiveValues> resultsSorted = new PriorityQueue<>(results.size(), new HeuristicDirectiveValues.PriorityComparator());
-        resultsSorted.addAll(results);
-        return resultsSorted;
+        results.sort(new HeuristicDirectiveValues.PriorityComparator());
+        Collections.reverse(results);
+        return results;
     }
 
     public static HeuristicDirectiveValues getTopQueryResult() {

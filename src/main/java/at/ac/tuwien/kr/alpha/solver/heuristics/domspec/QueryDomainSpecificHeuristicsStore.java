@@ -4,7 +4,7 @@ import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveValues;
 import at.ac.tuwien.kr.alpha.common.prolog.QueryInformationStorage;
 import at.ac.tuwien.kr.alpha.solver.ChoiceManager;
 
-import java.util.PriorityQueue;
+import java.util.List;
 
 /**
  * Class to integrate the results of query domain specific heuristics into the alpha heuristic structure.
@@ -14,7 +14,7 @@ import java.util.PriorityQueue;
  */
 public class QueryDomainSpecificHeuristicsStore implements DomainSpecificHeuristicsStore {
 
-    PriorityQueue<HeuristicDirectiveValues> priorityQueue = null;
+    List<HeuristicDirectiveValues> priorityList = null;
     @Override
     public void addInfo(int heuristicId, HeuristicDirectiveValues values) {
         return;
@@ -22,8 +22,8 @@ public class QueryDomainSpecificHeuristicsStore implements DomainSpecificHeurist
 
     @Override
     public HeuristicDirectiveValues poll() {
-        this.priorityQueue = QueryInformationStorage.getQueryResults();
-        return priorityQueue.poll();
+        this.priorityList = QueryInformationStorage.getQueryResults();
+        return priorityList.size() != 0 ? priorityList.get(0) : null;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class QueryDomainSpecificHeuristicsStore implements DomainSpecificHeurist
 
 
     public void updateInformation() {
-        this.priorityQueue = QueryInformationStorage.getQueryResults();
+        this.priorityList = QueryInformationStorage.getQueryResults();
     }
 
 
