@@ -5,13 +5,14 @@ import at.ac.tuwien.kr.alpha.common.AtomStore;
 import at.ac.tuwien.kr.alpha.common.Predicate;
 import at.ac.tuwien.kr.alpha.common.atoms.BasicAtom;
 import at.ac.tuwien.kr.alpha.common.program.Facts;
+import at.ac.tuwien.kr.alpha.common.terms.VariableTerm;
 import at.ac.tuwien.kr.alpha.grounder.Instance;
 import org.jpl7.*;
 
 import java.lang.Integer;
 import java.util.*;
 
-//TODO Class is  (for convenience) should be changed to be instance later.
+//TODO Class is Singleton (for convenience) should be changed to be instance later.
 
 /**
  * Simple Utility class that provides interface for making queries, adding and removing facts from prolog.
@@ -149,27 +150,27 @@ public class SWIPLPrologModule implements PrologModule {
         }
         qTime += System.nanoTime() - startTime;
         return sb.toString();
-        /*
-        if (q.hasNext()) {
-            Map<String, Term> binding = q.next();
-            qTime += System.nanoTime() - startTime;
-            return binding.get(result).toString();
-        }
-        return null;*/
     }
     @Override
-    public List<Map<String, String>> poseQueryGetResults(String query, String[] results) {
+    public List<Map<String, String>> poseQueryGetResults(String query, VariableTerm[] results) {
         long startTime = System.nanoTime();
         Term term = Term.textToTerm(query);
         Query q = new Query(term);
         ArrayList<Map<String, String>> query_results = new ArrayList<>();
-        while (q.hasNext()) {
-            Map<String, String> solution = new HashMap<>();
-            Map<String, Term> binding = q.next();
-            for (String result : results) {
-                solution.put(result, binding.get(result).toString());
+        try {
+            while (q.hasNext()) {
+                Map<String, String> solution = new HashMap<>();
+                Map<String, Term> binding = q.next();
+                for (VariableTerm result : results) {
+                    Term resultValue = binding.get(result.toString());
+                    if (resultValue != null) {
+                        solution.put(result.toString(), resultValue.toString());
+                    }
+                }
+                query_results.add(solution);
             }
-            query_results.add(solution);
+        } catch(PrologException e) {
+            e.printStackTrace();
         }
         qTime += System.nanoTime() - startTime;
         return query_results;

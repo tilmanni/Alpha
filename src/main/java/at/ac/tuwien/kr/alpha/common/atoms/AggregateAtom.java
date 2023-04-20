@@ -27,9 +27,7 @@
  */
 package at.ac.tuwien.kr.alpha.common.atoms;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import at.ac.tuwien.kr.alpha.common.ComparisonOperator;
 import at.ac.tuwien.kr.alpha.common.Predicate;
@@ -191,6 +189,16 @@ public class AggregateAtom extends Atom {
 
 	public List<AggregateElement> getAggregateElements() {
 		return Collections.unmodifiableList(aggregateElements);
+	}
+
+	public Set<Predicate> getAggregateBodyPredicates() {
+		Set<Predicate> bodyPredicates = new HashSet<>();
+		for (AggregateElement aggregateElement : aggregateElements) {
+			for (Literal elementLiteral : aggregateElement.getElementLiterals()) {
+				bodyPredicates.add(elementLiteral.getPredicate());
+			}
+		}
+		return bodyPredicates;
 	}
 
 	public enum AggregateFunctionSymbol {

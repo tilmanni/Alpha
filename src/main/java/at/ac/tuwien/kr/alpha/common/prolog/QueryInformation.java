@@ -2,6 +2,8 @@ package at.ac.tuwien.kr.alpha.common.prolog;
 
 import at.ac.tuwien.kr.alpha.common.AtomStore;
 import at.ac.tuwien.kr.alpha.common.HeuristicDirective;
+import at.ac.tuwien.kr.alpha.common.Predicate;
+import at.ac.tuwien.kr.alpha.common.atoms.AggregateAtom;
 import at.ac.tuwien.kr.alpha.common.atoms.BasicAtom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveAtom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveValues;
@@ -60,10 +62,22 @@ public class QueryInformation {
             if (positiveHeuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
                 this.occurringPredicates.add(positiveHeuristicDirectiveAtom.getAtom().getPredicate().toString());
             }
+            else if(positiveHeuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
+                AggregateAtom positiveAggregateAtom = (AggregateAtom) positiveHeuristicDirectiveAtom.getAtom();
+                for(Predicate occurringPredicate : positiveAggregateAtom.getAggregateBodyPredicates()) {
+                    this.occurringPredicates.add(occurringPredicate.toString());
+                }
+            }
         }
         for (HeuristicDirectiveAtom negativeHeuristicDirectiveAtom : heuristicDirective.getBody().getBodyAtomsNegative()) {
             if (negativeHeuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
                 this.occurringPredicates.add(negativeHeuristicDirectiveAtom.getAtom().getPredicate().toString());
+            }
+            else if(negativeHeuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
+                AggregateAtom negativeAggregateAtom = (AggregateAtom) negativeHeuristicDirectiveAtom.getAtom();
+                for(Predicate occurringPredicate : negativeAggregateAtom.getAggregateBodyPredicates()) {
+                    this.occurringPredicates.add(occurringPredicate.toString());
+                }
             }
         }
 
@@ -107,7 +121,6 @@ public class QueryInformation {
     public List<HeuristicDirectiveValues> getQueryResults() {
         return this.queryResults;
     }
-
     public Set<String> getOccurringPredicates() {
         return this.occurringPredicates;
     }
