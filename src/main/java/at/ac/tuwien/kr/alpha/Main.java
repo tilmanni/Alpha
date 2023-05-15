@@ -42,6 +42,7 @@ import at.ac.tuwien.kr.alpha.common.program.NormalProgram;
 import at.ac.tuwien.kr.alpha.config.AlphaConfig;
 import at.ac.tuwien.kr.alpha.config.CommandLineParser;
 import at.ac.tuwien.kr.alpha.config.InputConfig;
+import at.ac.tuwien.kr.alpha.grounder.NaiveGrounder;
 import at.ac.tuwien.kr.alpha.solver.Solver;
 import at.ac.tuwien.kr.alpha.solver.SolverMaintainingStatistics;
 import org.antlr.v4.runtime.RecognitionException;
@@ -219,6 +220,9 @@ public class Main {
 		}
 		if (alpha.getConfig().isPrintStats()) {
 			((SolverMaintainingStatistics) solver).printStatistics();
+		}
+		if (alpha.getConfig().isUseQueryHeuristics()) {
+			System.out.println(NaiveGrounder.getPrologModuleInstance().getPrologStatistics());
 		}
 	}
 

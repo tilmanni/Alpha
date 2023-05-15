@@ -192,4 +192,17 @@ public class SWIPLPrologModule implements PrologModule {
         return this.qTime;
     }
 
+    @Override
+    public String getPrologStatistics() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Prolog Statistics: \n");
+        sb.append("add time=").append(getAddTime() / 1000000).append(" ms, ");
+        sb.append("remove time=").append(getRemoveTime() / 1000000).append(" ms, ");
+        sb.append("query time=").append(getQTime() / 1000000).append(" ms, ");
+        long totalTime = getAddTime() + getRemoveTime() + getQTime();
+        sb.append("total time=").append(totalTime / 1000000).append(" ms");
+        return sb.toString();
+    }
+
+
 }

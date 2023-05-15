@@ -29,4 +29,6 @@ public interface PrologModule {
     long getRemoveTime();
 
     long getQTime();
+
+    String getPrologStatistics();
 }
