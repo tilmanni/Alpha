@@ -7,9 +7,10 @@ import at.ac.tuwien.kr.alpha.common.atoms.BasicAtom;
 import at.ac.tuwien.kr.alpha.common.program.Facts;
 import at.ac.tuwien.kr.alpha.common.terms.VariableTerm;
 import at.ac.tuwien.kr.alpha.grounder.Instance;
-import org.jpl7.*;
+import org.jpl7.PrologException;
+import org.jpl7.Query;
+import org.jpl7.Term;
 
-import java.lang.Integer;
 import java.util.*;
 
 //TODO Class is Singleton (for convenience) should be changed to be instance later.
@@ -30,11 +31,11 @@ import java.util.*;
 public class SWIPLPrologModule implements PrologModule {
     private  AtomStore atomStore;
 
-    public  long removeTime = 0;
-    public  long addTime = 0;
+    public  long removeTime;
+    public  long addTime;
 
     //queryTime as name lead to inexplicable problems
-    public  long qTime = 0;
+    public  long qTime;
 
     public SWIPLPrologModule() {
     }
@@ -156,7 +157,7 @@ public class SWIPLPrologModule implements PrologModule {
         long startTime = System.nanoTime();
         Term term = Term.textToTerm(query);
         Query q = new Query(term);
-        ArrayList<Map<String, String>> query_results = new ArrayList<>();
+        ArrayList<Map<String, String>> queryResults = new ArrayList<>();
         try {
             while (q.hasNext()) {
                 Map<String, String> solution = new HashMap<>();
@@ -167,13 +168,13 @@ public class SWIPLPrologModule implements PrologModule {
                         solution.put(result.toString(), resultValue.toString());
                     }
                 }
-                query_results.add(solution);
+                queryResults.add(solution);
             }
-        } catch(PrologException e) {
+        } catch (PrologException e) {
             e.printStackTrace();
         }
         qTime += System.nanoTime() - startTime;
-        return query_results;
+        return queryResults;
     }
 
     @Override

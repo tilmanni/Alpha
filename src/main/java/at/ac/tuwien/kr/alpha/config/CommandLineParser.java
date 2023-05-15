@@ -505,6 +505,8 @@ public class CommandLineParser {
 		cfg.setIgnoreDomspecHeuristics(true);
 	}
 
-	private void handleUseQueryHeuristics(Option opt, SystemConfig cfg) {cfg.setUseQueryHeuristics(true);}
+	private void handleUseQueryHeuristics(Option opt, SystemConfig cfg) {
+		cfg.setUseQueryHeuristics(true);
+	}
 
 }

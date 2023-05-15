@@ -38,7 +38,7 @@ public class HeuristicsConfigurationBuilder {
 	private Heuristic heuristic;
 	private boolean respectDomspecHeuristics = true;
 
-	private boolean useQueryHeuristics = false;
+	private boolean useQueryHeuristics;
 	private BinaryNoGoodPropagationEstimation.Strategy momsStrategy;
 	private List<Integer> replayChoices;
 

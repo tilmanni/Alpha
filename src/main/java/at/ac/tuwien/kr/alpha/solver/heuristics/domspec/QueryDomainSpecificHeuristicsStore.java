@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class QueryDomainSpecificHeuristicsStore implements DomainSpecificHeuristicsStore {
 
-    List<HeuristicDirectiveValues> priorityList = null;
+    List<HeuristicDirectiveValues> priorityList;
     @Override
     public void addInfo(int heuristicId, HeuristicDirectiveValues values) {
         return;

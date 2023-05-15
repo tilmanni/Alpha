@@ -20,25 +20,25 @@ public class QueryInformationStorage {
     /*
      * Sadly, the plural of "information" is "information".
      */
-    private static final List<QueryInformation> queryInformation = new ArrayList<>();
+    private static final List<QueryInformation> QUERY_INFORMATION = new ArrayList<>();
 
-    private static AtomStore atomStore = null;
+    private static AtomStore atomStore;
 
-    private static final Set<String> occurringPredicates = new HashSet<>();
+    private static final Set<String> OCCURRING_PREDICATES = new HashSet<>();
 
-    private static boolean dynamicPredicatesInitialized = false;
+    private static boolean dynamicPredicatesInitialized;
 
 
 
 
 
     public static List<QueryInformation> getQueryInformation() {
-        return queryInformation;
+        return QUERY_INFORMATION;
     }
 
     public static void addQueryInformation(QueryInformation queryInformationToAdd) {
-        queryInformation.add(queryInformationToAdd);
-        occurringPredicates.addAll(queryInformationToAdd.getOccurringPredicates());
+        QUERY_INFORMATION.add(queryInformationToAdd);
+        OCCURRING_PREDICATES.addAll(queryInformationToAdd.getOccurringPredicates());
     }
 
     public static void updateInformation() {
@@ -48,7 +48,7 @@ public class QueryInformationStorage {
         if (!dynamicPredicatesInitialized) {
             initializeDynamicPredicates();
         }
-        for(QueryInformation queryInformationToUpdate : queryInformation) {
+        for (QueryInformation queryInformationToUpdate : QUERY_INFORMATION) {
             queryInformationToUpdate.updateResults(atomStore);
         }
     }
@@ -63,7 +63,7 @@ public class QueryInformationStorage {
             return null;
         }
         ArrayList<HeuristicDirectiveValues> results = new ArrayList<>();
-        for(QueryInformation queryInformationToGetResultsFrom : queryInformation) {
+        for (QueryInformation queryInformationToGetResultsFrom : QUERY_INFORMATION) {
             queryInformationToGetResultsFrom.updateResults(atomStore);
             results.addAll(queryInformationToGetResultsFrom.getQueryResults());
         }
@@ -76,8 +76,8 @@ public class QueryInformationStorage {
         if (atomStore == null) {
             return null;
         }
-        PriorityQueue<HeuristicDirectiveValues> results = new PriorityQueue<>(2000, new HeuristicDirectiveValues.PriorityComparator());
-        for(QueryInformation queryInformationToGetResultsFrom : queryInformation) {
+        PriorityQueue<HeuristicDirectiveValues> results = new PriorityQueue<>(2000, new HeuristicDirectiveValues.PriorityComparator()); //TODO Set more natural capacity limit, not just magic number
+        for (QueryInformation queryInformationToGetResultsFrom : QUERY_INFORMATION) {
             queryInformationToGetResultsFrom.updateResults(atomStore);
             results.addAll(queryInformationToGetResultsFrom.getQueryResults());
         }
@@ -90,7 +90,7 @@ public class QueryInformationStorage {
 
     private static void initializeDynamicPredicates() {
         PrologModule prologModule = NaiveGrounder.getPrologModuleInstance();
-        for (String predicate : occurringPredicates) {
+        for (String predicate : OCCURRING_PREDICATES) {
             prologModule.poseQuery("dynamic " + predicate);
         }
         dynamicPredicatesInitialized = true;

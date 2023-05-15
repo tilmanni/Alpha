@@ -180,7 +180,7 @@ public class ASPtoQueryTranslator {
             throw new IllegalArgumentException("Unsupported Literal for Prolog Heuristics " + literal);
         }
         if (literal.isNegated()) {
-            atomTranslated = "\\+ "+ atomTranslated;
+            atomTranslated = "\\+ " + atomTranslated;
         }
         return atomTranslated;
     }
@@ -213,14 +213,13 @@ public class ASPtoQueryTranslator {
             if (heuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
                 positivelyOccurringGlobalVariables.addAll(heuristicDirectiveAtom.getAtom().getOccurringVariables());
                 orderedBody.add(heuristicDirectiveAtom);
-            }
-            else {
+            } else {
                 queue.add(heuristicDirectiveAtom);
             }
             globalVariables.addAll(getGlobalVariables(heuristicDirectiveAtom));
         }
 
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             HeuristicDirectiveAtom heuristicDirectiveAtom = queue.poll();
             IsCoveredPair isCoveredPair = isCovered(heuristicDirectiveAtom, positivelyOccurringGlobalVariables, globalVariables);
             if (isCoveredPair.isCovered) {
@@ -228,31 +227,21 @@ public class ASPtoQueryTranslator {
                     positivelyOccurringGlobalVariables.add(isCoveredPair.assignedVariable);
                 }
                 orderedBody.add(heuristicDirectiveAtom);
-            }
-            else {
+            } else {
                 queue.add(heuristicDirectiveAtom);
             }
         }
         return orderedBody;
-
-
-
-
-
-
-
     }
-
-
 
     private static Set<VariableTerm> getGlobalVariables(HeuristicDirectiveAtom heuristicDirectiveAtom) {
         if (heuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
             Set<VariableTerm> globalVariables = new HashSet<>();
             AggregateAtom aggregateAtom = (AggregateAtom) heuristicDirectiveAtom.getAtom();
-            if(aggregateAtom.getLowerBoundTerm() != null) {
+            if (aggregateAtom.getLowerBoundTerm() != null) {
                 globalVariables.addAll(aggregateAtom.getLowerBoundTerm().getOccurringVariables());
             }
-            if(aggregateAtom.getUpperBoundTerm() != null) {
+            if (aggregateAtom.getUpperBoundTerm() != null) {
                 globalVariables.addAll(aggregateAtom.getUpperBoundTerm().getOccurringVariables());
             }
             return globalVariables;
@@ -264,8 +253,7 @@ public class ASPtoQueryTranslator {
         Atom atom = heuristicDirectiveAtom.getAtom();
         if (atom instanceof ComparisonAtom) {
             return isCoveredCompAtom((ComparisonAtom) atom, positivelyOccurringVariables);
-        }
-        else if (atom instanceof AggregateAtom) {
+        } else if (atom instanceof AggregateAtom) {
             return isCoveredAggAtom((AggregateAtom) atom, positivelyOccurringVariables, globalVariables);
         }
         return new IsCoveredPair(false, null);
@@ -313,8 +301,6 @@ public class ASPtoQueryTranslator {
                 }
             }
         }
-
-
         return new IsCoveredPair(true, assignedVariable);
 
     }

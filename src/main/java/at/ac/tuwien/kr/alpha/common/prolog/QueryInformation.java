@@ -61,10 +61,9 @@ public class QueryInformation {
         for (HeuristicDirectiveAtom positiveHeuristicDirectiveAtom : heuristicDirective.getBody().getBodyAtomsPositive()) {
             if (positiveHeuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
                 this.occurringPredicates.add(positiveHeuristicDirectiveAtom.getAtom().getPredicate().toString());
-            }
-            else if(positiveHeuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
+            } else if (positiveHeuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
                 AggregateAtom positiveAggregateAtom = (AggregateAtom) positiveHeuristicDirectiveAtom.getAtom();
-                for(Predicate occurringPredicate : positiveAggregateAtom.getAggregateBodyPredicates()) {
+                for (Predicate occurringPredicate : positiveAggregateAtom.getAggregateBodyPredicates()) {
                     this.occurringPredicates.add(occurringPredicate.toString());
                 }
             }
@@ -72,10 +71,9 @@ public class QueryInformation {
         for (HeuristicDirectiveAtom negativeHeuristicDirectiveAtom : heuristicDirective.getBody().getBodyAtomsNegative()) {
             if (negativeHeuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
                 this.occurringPredicates.add(negativeHeuristicDirectiveAtom.getAtom().getPredicate().toString());
-            }
-            else if(negativeHeuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
+            } else if (negativeHeuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
                 AggregateAtom negativeAggregateAtom = (AggregateAtom) negativeHeuristicDirectiveAtom.getAtom();
-                for(Predicate occurringPredicate : negativeAggregateAtom.getAggregateBodyPredicates()) {
+                for (Predicate occurringPredicate : negativeAggregateAtom.getAggregateBodyPredicates()) {
                     this.occurringPredicates.add(occurringPredicate.toString());
                 }
             }
@@ -101,12 +99,13 @@ public class QueryInformation {
             return;
         }
         PrologModule prologModule = NaiveGrounder.getPrologModuleInstance();
-        List<Map<String,String>> results = prologModule.poseQueryGetResults(stringQuery, variables);
+        List<Map<String, String>> results = prologModule.poseQueryGetResults(stringQuery, variables);
         List<HeuristicDirectiveValues> tempQueryResults = new ArrayList<>();
-        for (Map<String,String> solution : results) {
+        for (Map<String, String> solution : results) {
             Unifier unifier = new Unifier();
             for (int i = 2; i < variables.length; i++) {
                 unifier.put(variables[i], ConstantTerm.getInstance(Integer.parseInt(solution.get(variables[i].toString()))));
+                //FIXME only supports integer values
             }
             BasicAtom groundHeadAtom = (BasicAtom) headAtom.substitute(unifier).getAtom();
             int groundHeadId = atomStore.putIfAbsent(groundHeadAtom);
