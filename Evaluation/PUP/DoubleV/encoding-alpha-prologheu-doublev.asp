@@ -1,11 +1,47 @@
-assigned_zone_unit(1, 1).
+%%%MANDATORY INTIAL ASSIGNMENTS
 
-maxUnit(80). 
-startUnit(15). 
-number_P(0..100).
+assigned_zone_unit(1,1).
+assigned_sensor_unit(2,1).
+assigned_sensor_unit(1,2).
+assigned_zone_unit(2,2).
 
-basis(10).										
-								
+
+
+%%%INSTANCE SIZE 30
+%assigned_zone_unit(11,1).
+    %assigned_sensor_unit(20,2).
+%assigned_zone_unit(21,2).
+
+
+%%%INSTANCE SIZE 60
+%assigned_zone_unit(21,1).
+    %assigned_sensor_unit(40,2).
+%assigned_zone_unit(41,2).
+
+%%%INSTANCE SIZE 90
+%assigned_zone_unit(31,1).
+    %assigned_sensor_unit(60,2).
+%assigned_zone_unit(61,2).
+
+%%%INSTANCE SIZE 120
+%assigned_zone_unit(41,1).
+    %assigned_sensor_unit(80,2).
+%assigned_zone_unit(81,2).
+
+%%%INSTANCE SIZE 150
+%assigned_zone_unit(51,1).
+    %assigned_sensor_unit(100,2).
+%assigned_zone_unit(101,2).
+
+%%%INSTANCE SIZE 180
+%assigned_zone_unit(61,1).
+    %assigned_sensor_unit(120,2).
+%assigned_zone_unit(121,2).
+
+
+maxUnit(200). 
+number_P(0..300).
+
 maxZone(N) :- N = #count {Z: elem(z,Z)}.
 maxSensor(N) :- N = #count {S: elem(s,S)}.
 
@@ -134,47 +170,66 @@ num_forbidden_places_of_zones(Z,N1+4) :- assignable_zone_unit(Z,_),
         not not_assigned_sensor_unit(S,U),
         not sensor_blocked_on_unit(S,U),
         
+        NAZ = #count {N : assigned_zone_unit(N, _)},
+        
+        NAS = #count {M : assigned_sensor_unit(M, _)},
+        
+        maxSensor(MaxS), 
+        NAS < MaxS,
+        NAZ > NAS,
+        
         Deg_sensor_dyn = #count {ZN: zone2sensor(ZN,S), assigned_zone_unit(ZN, _)},
 	
         Forbidden_placement_total = #max {N: num_forbidden_places_of_sensors(S, N)},
 	
-        Assigned_sensors_unit = #count{SN: assigned_sensor_unit(SN,U)},
+        
+        Num_constr_on_sensor_places_by_zones_on_U1     = 	#count {SN : assigned_zone_unit(Z,U1), zone2sensor(Z,SN)}, 
+        Num_constr_on_sensor_places_by_zones_on_U	 = 	#count {SN : assigned_zone_unit(Z,U),   zone2sensor(Z,SN)}, 
+        Num_constr_on_sensor_places_by_zones_on_U2	 =	#count {SN : assigned_zone_unit(Z,U2), zone2sensor(Z,SN)},
+        Num_sat_constr_on_sensor_places_by_zones_on_U1  = 	#count {SN : assigned_zone_unit(Z,U1), zone2sensor(Z,SN),  assigned_sensor(SN)}, 
+        Num_sat_constr_on_sensor_places_by_zones_on_U	 = 	#count {SN : assigned_zone_unit(Z,U),   zone2sensor(Z,SN),  assigned_sensor(SN)}, 
+        Num_sat_constr_on_sensor_places_by_zones_on_U2	 =	#count {SN : assigned_zone_unit(Z,U2), zone2sensor(Z,SN),  assigned_sensor(SN)},
+	
 
+        Open_constraints_on_placement = Num_constr_on_sensor_places_by_zones_on_U1
+                                        + Num_constr_on_sensor_places_by_zones_on_U
+                                        + Num_constr_on_sensor_places_by_zones_on_U2 
+                                        - Num_sat_constr_on_sensor_places_by_zones_on_U1
+                                        - Num_sat_constr_on_sensor_places_by_zones_on_U
+                                        - Num_sat_constr_on_sensor_places_by_zones_on_U2,
+        comUnit(U),
+        degree_sensor(S, Deg_sensor_stat),
+        Minus_deg_sensor_stat = 6 - Deg_sensor_stat,
         
-        Direct_con_zones = #count {Z : assigned_zone_unit(Z,U), zone2sensor(Z,S) }, 
         
+        W = Deg_sensor_dyn * 1000 + Forbidden_placement_total * 100 + Open_constraints_on_placement * 10 + Minus_deg_sensor_stat + 0.  [W@0]
         
-        
-        
-        W = Deg_sensor_dyn * 10000 + Forbidden_placement_total * 1000 + Assigned_sensors_unit * 100 + Direct_con_zones * 10.  [W@0]
-  
-%Adjacent_sensors = #count {S1 : zone2sensor(Z, S), zone2sensor(Z, S1), S1 != S},
-        
-%Adjacent_sensors_negative = 5 - Adjacent_sensors,
-
-% Adjacent_sensors_negative + 0
     
         
-#heuristic assigned_zone_unit(Z,U) : 
+    #heuristic assigned_zone_unit(Z,U) : 
         assignable_zone_unit(Z,U),
         not not_assigned_zone_unit(Z,U),
         
+        Forbidden_placement_total = #max {FN2: num_forbidden_places_of_zones(Z, FN2)},
+        Assigned_zones_unit = #count{ZN: assigned_zone_unit(ZN,U)},
         
-        Assigned_zones_unit = #count{ZN2: assigned_zone_unit(ZN2,U)},
+        Min_constraint_degree = #min{DN: zone2sensor(Z, SN), degree_sensor(SN, DN)},
         
-        U1 = U - 1,
-        U2 = U + 1,
+        Minus_min_constraint_degree = 6 - Min_constraint_degree,
         
-        N0 = #max{N : num_sensors_on_unit(N, U)},
+        NAZ = #count {M1 : assigned_zone_unit(M1, _)},
         
-        N1 = #max{N : num_sensors_on_unit(N, U1)},
-        N2 = #max{N : num_sensors_on_unit(N, U2)},
+        NAS = #count {M2 : assigned_sensor_unit(M2, _)},
         
-        Available_spaces_for_sensors = 6 - (N0 + N1 + N2), 
-
-
+        maxZone(MaxZ), 
+        NAZ < MaxZ,
+        NAZ <= NAS,
+                                        
+        Direct_con_sensors = #count {S2 : assigned_sensor_unit(S2,U), zone2sensor(Z,S2)},
         
-        W = Assigned_zones_unit * 10 + Available_spaces_for_sensors.  [W@1]
+        comUnit(U),
+        
+        W = Assigned_zones_unit * 1000 + Forbidden_placement_total * 100 + Minus_min_constraint_degree * 10 + Direct_con_sensors + 0.  [W@0]
 	
 
 
