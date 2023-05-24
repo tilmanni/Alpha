@@ -15,7 +15,7 @@
 %only return the final value, and thus could not be used during the grounding-solving cycle, where heuristics apply.
 
 %While the heuristics, if b's and c's have no further conditions to be assigned, would always follow the same pattern,
-%if we introduce some independant b's or c's the heuristics can of course accomodate them. 
+%if we introduce some independent b's or c's the heuristics can of course accommodate them.
 
 #const maxv=20.
 
@@ -29,23 +29,9 @@ c(X) :- x(X), not b(X).
 
 %Verification
 %To verify if our set goal was achieved, we want to introduce a constraint, which would exclude answer 
-%sets where the difference between the sums of values are greater than 1. But for that, we need to calculate the
-%final sum of values for both c and b, and compare them. Normally, this would be done using a simple #sum aggregate.
-%But the current implementation of Alpha does not have  a functioning (in terms of runtime) implementation.
-%As we know the exact structure of x's, b's and c's, we can just sum up all the values manually using the following encoding.
-%Aftwerwards, the constraint can be checked.
+%sets where the difference between the sums of values are greater than 1. For that, we need to calculate the
+%final sum of values for both c and b, and compare them. In clingo the normal sum aggregate can be used.
 
-
-step_Sum_B(0, 0).
-step_Sum_C(0, 0).
-
-step_Sum_B(Previous_sum + N, N) :- step_Sum_B(Previous_sum, N - 1), x(N), b(N).
-step_Sum_B(Previous_sum, N) :- step_Sum_B(Previous_sum, N - 1), x(N), not b(N).
-step_Sum_C(Previous_sum + N, N) :- step_Sum_C(Previous_sum, N - 1), x(N), c(N).
-step_Sum_C(Previous_sum, N) :- step_Sum_C(Previous_sum, N - 1), x(N), not c(N).
-
-sum_B(Sum) :- step_Sum_B(Sum, maxv).
-sum_C(Sum) :- step_Sum_C(Sum, maxv).
-
-
-:- sum_B(SB) , sum_C(SC), (SB-SC)**2 > 1.
+sum_B(Sum) :- Sum = #sum{Y : b(Y)}.
+sum_C(Sum) :- Sum = #sum{Y : c(Y)}.
+:- sum_B(SB), sum_C(SC), (SB-SC)**2 > 1.

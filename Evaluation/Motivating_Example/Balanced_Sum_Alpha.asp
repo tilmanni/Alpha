@@ -15,7 +15,7 @@
 %only return the final value, and thus could not be used during the grounding-solving cycle, where heuristics apply.
 
 %While the heuristics, if b's and c's have no further conditions to be assigned, would always follow the same pattern,
-%if we introduce some independant b's or c's the heuristics can of course accomodate them. 
+%if we introduce some independent b's or c's the heuristics can of course accommodate them.
 
 %max_Value(20).
 x(1..V) :-  max_Value(V).        %Initializing values
@@ -27,19 +27,19 @@ c(X) :- x(X), not b(X).
 %b(201).
 
 %Heuristic for b's taking into account the current sum of values in c, and the value to be assigned.
-#heuristic b(X) : x(X), not c(X), S = #sum{Y : c(Y)}, W = S * 10 + X. [W@1]  
+#heuristic b(X) : x(X), not c(X), S = #sum{Y : c(Y)}. [X@S]
 
 %Heuristic for c's mirrors that of b.
-#heuristic c(X) : x(X), not b(X), S = #sum{Y : b(Y)}, W = S * 10 + X. [W@1]
+#heuristic c(X) : x(X), not b(X), S = #sum{Y : b(Y)}. [X@S]
 
 
 %Verification
 %To verify if our set goal was achieved, we want to introduce a constraint, which would exclude answer 
-%sets where the difference between the sums of values are greater than 1. But for that, we need to calculate the
+%sets where the difference between the sums of values are greater than 1. For that, we need to calculate the
 %final sum of values for both c and b, and compare them. Normally, this would be done using a simple #sum aggregate.
 %But the current implementation of Alpha does not have  a functioning (in terms of runtime) implementation.
 %As we know the exact structure of x's, b's and c's, we can just sum up all the values manually using the following encoding.
-%Aftwerwards, the constraint can be checked.
+%Afterwards, the constraint can be checked.
 
 
 step_Sum_B(0, 0).
