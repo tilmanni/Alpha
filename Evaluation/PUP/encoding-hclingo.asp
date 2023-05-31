@@ -47,3 +47,6 @@ h_assign_1(U1,T,X,W) :- order(X,T,O), assign(U,T1,Y), order(Y,T1,O-1), maxOrder(
 h_assign_2(U+1,T,X,W) :- order(X,T,O), assign(U,T1,Y), order(Y,T1,O-1), maxOrder(M), maxUnit(MU), comUnit(U+1), maxElem(ME), W=10*MU*(M-O)+2*(ME-X).
 
 #heuristic assign(U,T,X) : h_assign_2(U,T,X,W). [W, true]
+
+assigned_zone_unit(Z, U) :- assign(U, z, Z).
+assigned_zone_unit(S, U) :- assign(U, s, S).

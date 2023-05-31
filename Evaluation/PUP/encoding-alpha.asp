@@ -53,3 +53,6 @@ nUnits(N) :- comUnit(N), Np1=N+1, not comUnit(Np1).
 % translate old breadth-first syntax to new one:
 layer(z,X,L) :- zoneLayer(X,L).
 layer(s,X,L) :- sensorLayer(X,L).
+
+assigned_zone_unit(Z, U) :- assign(U, z, Z).
+assigned_zone_unit(S, U) :- assign(U, s, S).
