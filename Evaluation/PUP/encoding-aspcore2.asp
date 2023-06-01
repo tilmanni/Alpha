@@ -1,3 +1,5 @@
+maxPU(2).
+
 elem(z,Z) :- zone2sensor(Z,D).
 elem(d,D) :- zone2sensor(Z,D).
 
