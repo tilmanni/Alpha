@@ -56,15 +56,12 @@ assigned_sensor_unit(S,U)     :- assignable_sensor_unit(S,U), not not_assigned_s
 not_assigned_sensor_unit(S,U) :- assignable_sensor_unit(S,U), not assigned_sensor_unit(S,U), 0 < U.
 
 
-
 assigned_zone(Z) :- assigned_zone_unit(Z,U).
 assigned_sensor(S) :- assigned_sensor_unit(S,U).
 
 
 %%% auxiliary predicates for heuristics
 
-sensor_blocked_on_unit(S,U) :- assignable_sensor_unit(S,U), zone2sensor(Z,S), assigned_zone_unit(Z,U1), (U1-U)**2 > 1.
-sensor_blocked_on_unit(S,U) :- assignable_sensor_unit(S,U), zone2sensor(Z,S), zone2sensor(Z,SX), assigned_sensor_unit(SX,UX), (UX-U)**2 > 4.
 
 num_sensors_on_unit(N,U) :-  comUnit(U), sensorNumbers(N), N <= #count {S1: assigned_sensor_unit(S1,U)}.
 num_sensors_on_unit(2, 0).
@@ -104,17 +101,16 @@ num_forbidden_places_of_sensors(S,N1+4) :- assignable_sensor_unit(S,_),
 #heuristic assigned_sensor_unit(S,U) :
     assignable_sensor_unit(S,U),
     not not_assigned_sensor_unit(S,U),
-    not sensor_blocked_on_unit(S,U),
 
-    NAZ = #count {N : assigned_zone_unit(N, _)},
+    NAZ = #count {Z: assigned_zone_unit(Z, _)},
 
-    NAS = #count {M : assigned_sensor_unit(M, _)},
+    NAS = #count {SN: assigned_sensor_unit(SN, _)},
 
     maxSensor(MaxS),
     NAS < MaxS,
     NAZ > NAS,
 
-    Deg_sensor_dyn = #count {ZN: zone2sensor(ZN,S), assigned_zone_unit(ZN, _)},
+    Deg_sensor_dyn = #count {Z: zone2sensor(Z,S), assigned_zone_unit(Z, _)},
 
     Forbidden_placement_total = #max {N: num_forbidden_places_of_sensors(S, N)},
 
@@ -143,18 +139,17 @@ num_forbidden_places_of_sensors(S,N1+4) :- assignable_sensor_unit(S,_),
 #heuristic assigned_sensor_unit(S, U) :
     assignable_sensor_unit(S,U),
     not not_assigned_sensor_unit(S,U),
-    not sensor_blocked_on_unit(S,U),
 
     comUnit(U),
 
-    NAZ = #count {M1 : assigned_zone_unit(M1, _)},
+    NAZ = #count {Z: assigned_zone_unit(Z, _)},
 
-    NAS = #count {M2 : assigned_sensor_unit(M2, _)},
+    NAS = #count {SN: assigned_sensor_unit(SN, _)},
 
     NAZ = 2,
     NAS = 1,
 
-    Assigned_sensors_on_unit = #count{SN : assigned_sensor_unit(SN, U)},
+    Assigned_sensors_on_unit = #count{SN: assigned_sensor_unit(SN, U)},
     Open_positions_on_unit = 2 - Assigned_sensors_on_unit. [Open_positions_on_unit@2]
 
 #heuristic assigned_zone_unit(Z, U) :
@@ -175,18 +170,18 @@ num_forbidden_places_of_sensors(S,N1+4) :- assignable_sensor_unit(S,_),
 
     comUnit(U),
 
-    NAZ = #count {M1 : assigned_zone_unit(M1, _)},
+    NAZ = #count {ZN: assigned_zone_unit(ZN, _)},
 
-    NAS = #count {M2 : assigned_sensor_unit(M2, _)},
+    NAS = #count {S: assigned_sensor_unit(S, _)},
 
     NAZ = 2,
     NAS = 2,
 
-    Min_constraint_degree = #min{DN: zone2sensor(Z, SN), degree_sensor(SN, DN)},
+    Min_constraint_degree = #min{D: zone2sensor(Z, SN), degree_sensor(SN, D)},
 
     Minus_min_constraint_degree = 6 - Min_constraint_degree,
 
-    Direct_con_sensors = #count {S2 : assigned_sensor_unit(S2,U), zone2sensor(Z,S2)},
+    Direct_con_sensors = #count {S: assigned_sensor_unit(S,U), zone2sensor(Z,S)},
 
     W = Minus_min_constraint_degree * 10 + Direct_con_sensors + 0. [W@2]
 	

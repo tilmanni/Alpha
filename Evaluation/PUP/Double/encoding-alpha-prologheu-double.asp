@@ -63,8 +63,6 @@ assigned_sensor(S) :- assigned_sensor_unit(S,U).
 
 %%% auxiliary predicates for heuristics
 
-sensor_blocked_on_unit(S,U) :- assignable_sensor_unit(S,U), zone2sensor(Z,S), assigned_zone_unit(Z,U1), (U1-U)**2 > 1.
-sensor_blocked_on_unit(S,U) :- assignable_sensor_unit(S,U), zone2sensor(Z,S), zone2sensor(Z,SX), assigned_sensor_unit(SX,UX), (UX-U)**2 > 4.
 
 num_sensors_on_unit(N,U) :-  comUnit(U), sensorNumbers(N), N <= #count {S1: assigned_sensor_unit(S1,U)}.
 num_sensors_on_unit(2, 0).
@@ -103,29 +101,24 @@ num_forbidden_places_of_sensors(S,N1+4) :- assignable_sensor_unit(S,_),
 #heuristic assigned_sensor_unit(S,U) : 
         assignable_sensor_unit(S,U),
         not not_assigned_sensor_unit(S,U),
-        not sensor_blocked_on_unit(S,U),
         
-        Deg_sensor_dyn = #count {ZN: zone2sensor(ZN,S), assigned_zone_unit(ZN, _)},
+        Deg_sensor_dyn = #count {Z: zone2sensor(Z,S), assigned_zone_unit(Z, _)},
 	
         Forbidden_placement_total = #max {N: num_forbidden_places_of_sensors(S, N)},
 	
         Assigned_sensors_unit = #count{SN: assigned_sensor_unit(SN,U)},
 
         
-        Direct_con_zones = #count {Z : assigned_zone_unit(Z,U), zone2sensor(Z,S) }, 
-        
-        
-        
-        
+        Direct_con_zones = #count {Z: assigned_zone_unit(Z,U), zone2sensor(Z,S) },
+
         W = Deg_sensor_dyn * 10000 + Forbidden_placement_total * 1000 + Assigned_sensors_unit * 100 + Direct_con_zones * 10.  [W@0]
 
         
 #heuristic assigned_zone_unit(Z,U) : 
         assignable_zone_unit(Z,U),
         not not_assigned_zone_unit(Z,U),
-        
-        
-        Assigned_zones_unit = #count{ZN2: assigned_zone_unit(ZN2,U)},
+
+        Assigned_zones_unit = #count{ZN: assigned_zone_unit(ZN,U)},
         
         U1 = U - 1,
         U2 = U + 1,
@@ -135,9 +128,7 @@ num_forbidden_places_of_sensors(S,N1+4) :- assignable_sensor_unit(S,_),
         N1 = #max{N : num_sensors_on_unit(N, U1)},
         N2 = #max{N : num_sensors_on_unit(N, U2)},
         
-        Available_spaces_for_sensors = 6 - (N0 + N1 + N2), 
-
-
+        Available_spaces_for_sensors = 6 - (N0 + N1 + N2),
         
         W = Assigned_zones_unit * 10 + Available_spaces_for_sensors.  [W@1]
 	

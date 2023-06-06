@@ -1,10 +1,10 @@
 Commands for Double Evaluation
 
-Alpha normal:
+Alpha:
     
     <ALPHA_JAR> -i "<PATH>/Evaluation/PUP/Double/instances/double-<NUMBER>.asp" -i "<PATH>/Evaluation/PUP/encoding-alpha.asp" -n 1 -stat -f assign
  
-Alpha prologheu:
+Qh-alpha:
  
     <ALPHA_JAR> -i "<PATH>/Evaluation/PUP/Double/instances/double-<NUMBER>.asp" -i "<PATH>/Evaluation/PUP/Double/encoding-alpha-prologheu-double.asp" -n 1 -uqh -stat -f assigned_zone_unit -f assigned_sensor_unit
  

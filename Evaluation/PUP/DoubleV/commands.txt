@@ -1,18 +1,13 @@
 Commands for DoubleV Evaluation
 
-Alpha normal:
+Alpha:
     
     <ALPHA_JAR> -i "<PATH>/Evaluation/PUP/DoubleV/instances/doublev-<NUMBER>.asp" -i "<PATH>/Evaluation/PUP/encoding-alpha.asp" -n 1 -stat -f assign
  
-Alpha prologheu:
+Qh-alpha:
  
     <ALPHA_JAR> -i "<PATH>/Evaluation/PUP/DoubleV/instances/doublev-<NUMBER>.asp" -i "<PATH>/Evaluation/PUP/DoubleV/encoding-alpha-prologheu-doublev.asp" -n 1 -uqh -stat -f assigned_zone_unit -f assigned_sensor_unit
- 
-    
-    Note that, for the current heuristic to work, seven initial assignments have to be made manually. 
-    These differ depending on the instance size, and are all present in <PATH>/Evaluation/PUP/DoubleV/encoding-alpha-prologheu-doublev.asp, commented out.
-    If testing, add the appropriate initial assignment for the instance size.
-    
+
     
 Clingo:
 

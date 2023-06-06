@@ -1,13 +1,7 @@
 Commands for Evaluation
- 
-Alpha without heuristics:
-    
-    
-    <ALPHA_JAR> -i "<PATH>/Evaluation/PUP/Motivating_Example/Dynamic_Sum_example.asp" -str "max_Value(<NUMBER>)." -n 1 -ids -stat -f sum_C -f sum_B
- 
-Alpha prologheu:
 
- 
+Qh-alpha:
+
     <ALPHA_JAR> -i "<PATH>/Evaluation/PUP/Motivating_Example/Dynamic_Sum_example.asp" -str "max_Value(<NUMBER>)." -n 1 -uqh -stat -f sum_C -f sum_B
  
     
@@ -20,9 +14,6 @@ Replace <PATH> with path to Evaluation folder.
 Replace <NUMBER> with number >= 1.
 (Recommended <NUMBER> ranges: Alpha without heuristics 1-50, Alpha prologheu 1-1000, Clingo 1-100).
 
-To add table predicate, add '-i "<PATH>/Evaluation/Motivating_Example/Table_Predicate.asp"' to Alpha, or just '<PATH>/Evaluation/Motivating_Example/Table_Predicate.asp' to clingo.
-WARNING this will break clingo fast.
-    
     
 
   
