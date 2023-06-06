@@ -63,5 +63,5 @@ used(U) :- comUnit(U), assign(U,_,_).
 layer(z,X,L) :- zoneLayer(X,L).
 layer(s,X,L) :- sensorLayer(X,L).
 
-assigned_zone_unit(Z, U) :- assign(U, z, Z).
-assigned_zone_unit(S, U) :- assign(U, s, S).
+assigned_zone_unit(Z, U) :- assign(U,z,Z).
+assigned_zone_unit(S, U) :- assign(U,s,S).

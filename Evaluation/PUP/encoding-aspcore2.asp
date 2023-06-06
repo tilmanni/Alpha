@@ -36,8 +36,8 @@ partnerunits(U,P) :- partnerunits(P,U), P < U.
 
 :- comUnit(U), maxPU(M), #count{ P : partnerunits(U,P) } > M.
 
-assigned_sensor_unit(S, U) :- unit2sensor(U, S).
-assigned_zone_unit(Z, U) :- unit2zone(U, Z).
+assigned_sensor_unit(S,U) :- unit2sensor(U,S).
+assigned_zone_unit(Z,U) :- unit2zone(U,Z).
 
 % gtd(X+1,U) :- gt(A,X,U), comUnit(U+2), rule(A), elem(A,X+1).
 % gtd(X+1,U) :- gtd(X,U), rule(A), elem(A,X+1).

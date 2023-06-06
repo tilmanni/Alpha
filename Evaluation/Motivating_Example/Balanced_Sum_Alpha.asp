@@ -42,16 +42,16 @@ c(X) :- x(X), not b(X).
 %Afterwards, the constraint can be checked.
 
 
-step_Sum_B(0, 0).
-step_Sum_C(0, 0).
+step_Sum_B(0,0).
+step_Sum_C(0,0).
 
-step_Sum_B(Previous_sum + N, N) :- step_Sum_B(Previous_sum, N - 1), x(N), b(N).
-step_Sum_B(Previous_sum, N) :- step_Sum_B(Previous_sum, N - 1), x(N), not b(N).
-step_Sum_C(Previous_sum + N, N) :- step_Sum_C(Previous_sum, N - 1), x(N), c(N).
-step_Sum_C(Previous_sum, N) :- step_Sum_C(Previous_sum, N - 1), x(N), not c(N).
+step_Sum_B(Previous_sum + N,N) :- step_Sum_B(Previous_sum,N - 1), x(N), b(N).
+step_Sum_B(Previous_sum,N) :- step_Sum_B(Previous_sum,N - 1), x(N), not b(N).
+step_Sum_C(Previous_sum + N,N) :- step_Sum_C(Previous_sum,N - 1), x(N), c(N).
+step_Sum_C(Previous_sum,N) :- step_Sum_C(Previous_sum,N - 1), x(N), not c(N).
 
-sum_B(Sum) :- step_Sum_B(Sum, V), max_Value(V).
-sum_C(Sum) :- step_Sum_C(Sum, V), max_Value(V).
+sum_B(Sum) :- step_Sum_B(Sum,V), max_Value(V).
+sum_C(Sum) :- step_Sum_C(Sum,V), max_Value(V).
 
 
 :- sum_B(SB) , sum_C(SC), (SB-SC)**2 > 1.
