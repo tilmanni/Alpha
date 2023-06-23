@@ -77,7 +77,7 @@ public class ASPtoQueryTranslator {
     }
 
     private static String translateBasicAtom(BasicAtom basicAtomToTranslate) {
-        return basicAtomToTranslate.toString();
+        return addPrologPrefix(basicAtomToTranslate.toString());
     }
     private static String translateComparisonAtom(ComparisonAtom comparisonAtomToTranslate) {
         ComparisonOperator comparisonOperator = comparisonAtomToTranslate.getOperator();
@@ -313,5 +313,9 @@ public class ASPtoQueryTranslator {
             this.isCovered = isCovered;
             this.assignedVariable = assignedVariable;
         }
+    }
+
+    private static String addPrologPrefix(String string) {
+        return PrologModule.PROLOG_PREFIX + string;
     }
 }

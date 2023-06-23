@@ -105,7 +105,6 @@ public class QueryInformation {
             Unifier unifier = new Unifier();
             for (int i = 2; i < variables.length; i++) {
                 unifier.put(variables[i], ConstantTerm.getInstance(Integer.parseInt(solution.get(variables[i].toString()))));
-                //FIXME only supports integer values
             }
             BasicAtom groundHeadAtom = (BasicAtom) headAtom.substitute(unifier).getAtom();
             int groundHeadId = atomStore.putIfAbsent(groundHeadAtom);

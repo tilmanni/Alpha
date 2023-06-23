@@ -71,7 +71,7 @@ public class SWIPLPrologModule implements PrologModule {
             Query q =
                     new Query(
                             "asserta",
-                            new Term[]{Term.textToTerm(atomToAdd.toString())}
+                            new Term[]{Term.textToTerm(addPrologPrefix(atomToAdd.toString()))}
                     );
             if (!q.hasSolution()) {
                 System.out.println("Failed assertion at " + atomToAdd);
@@ -104,7 +104,7 @@ public class SWIPLPrologModule implements PrologModule {
             Query q =
                     new Query(
                             "retract",
-                            new Term[]{Term.textToTerm(atomToRemove.toString())}
+                            new Term[]{Term.textToTerm(addPrologPrefix(atomToRemove.toString()))}
                     );
             if (!q.hasSolution()) {
                 System.out.println("Failed retracting at " + atomToRemove);
@@ -202,6 +202,10 @@ public class SWIPLPrologModule implements PrologModule {
         long totalTime = getAddTime() + getRemoveTime() + getQTime();
         sb.append("total time=").append(totalTime / 1000000).append(" ms");
         return sb.toString();
+    }
+
+    private static String addPrologPrefix(String string) {
+        return PrologModule.PROLOG_PREFIX + string;
     }
 
 

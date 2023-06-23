@@ -11,8 +11,7 @@ import java.util.*;
 
 /**
  * Class with only static methods (for easy global access, not really OO) to store all queries and get their result.
- * Could probably be made non-static, if OO becomes requirements.
- *
+ * Could probably be made non-static, if OO becomes requirement.
  *
  */
 public class QueryInformationStorage {
@@ -91,7 +90,7 @@ public class QueryInformationStorage {
     private static void initializeDynamicPredicates() {
         PrologModule prologModule = NaiveGrounder.getPrologModuleInstance();
         for (String predicate : OCCURRING_PREDICATES) {
-            prologModule.poseQuery("dynamic " + predicate);
+            prologModule.poseQuery("dynamic " + PrologModule.PROLOG_PREFIX + predicate);
         }
         dynamicPredicatesInitialized = true;
     }

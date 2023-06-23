@@ -9,6 +9,8 @@ import java.util.Map;
 
 public interface PrologModule {
 
+    String PROLOG_PREFIX = "prolog_";
+
 
     void addFacts(Facts factsFromProgram);
 
