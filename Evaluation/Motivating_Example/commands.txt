@@ -1,0 +1,19 @@
+Commands for Evaluation
+
+Qh-alpha:
+
+    <ALPHA_JAR> -i "<PATH>/Evaluation/PUP/Motivating_Example/Dynamic_Sum_example.asp" -str "max_Value(<NUMBER>)." -n 1 -uqh -stat -f sum_C -f sum_B
+ 
+    
+Clingo:
+
+    clingo <PATH>/Evaluation/PUP/Motivating_Example/Dynamic_Sum_example.lp --const maxv=<NUMBER> 
+    
+Replace <ALPHA_JAR> with alpha jar (or use subsequent part as command line arguments).
+Replace <PATH> with path to Evaluation folder.
+Replace <NUMBER> with number >= 1.
+(Recommended <NUMBER> ranges: Alpha without heuristics 1-50, Alpha prologheu 1-1000, Clingo 1-100).
+
+    
+
+  

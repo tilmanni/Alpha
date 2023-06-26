@@ -1,0 +1,23 @@
+Commands for DoubleV Evaluation
+
+Alpha:
+    
+    <ALPHA_JAR> -i "<PATH>/Evaluation/PUP/DoubleV/instances/doublev-<NUMBER>.asp" -i "<PATH>/Evaluation/PUP/encoding-alpha.asp" -n 1 -stat -f assign
+ 
+Qh-alpha:
+ 
+    <ALPHA_JAR> -i "<PATH>/Evaluation/PUP/DoubleV/instances/doublev-<NUMBER>.asp" -i "<PATH>/Evaluation/PUP/DoubleV/encoding-alpha-prologheu-doublev.asp" -n 1 -uqh -stat -f assigned_zone_unit -f assigned_sensor_unit
+
+    
+Clingo:
+
+    clingo <PATH>/Evaluation/PUP/DoubleV/instances/doublev-<NUMBER>.asp <PATH>/Evaluation/PUP/encoding-hclingo.asp --quiet
+    
+Replace <ALPHA_JAR> with alpha jar (or use subsequent part as command line arguments).
+Replace <PATH> with path to Evaluation folder.
+Replace <NUMBER> with number in {30, 60, 90, 120, 150, 180},
+signifying the number of comUnits in the instance.
+    
+    
+
+  
