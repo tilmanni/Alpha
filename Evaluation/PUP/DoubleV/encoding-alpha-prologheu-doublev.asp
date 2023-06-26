@@ -104,17 +104,17 @@ num_forbidden_places_of_sensors(S,N1+4) :- assignable_sensor_unit(S,_),
     assignable_sensor_unit(S,U),
     not not_assigned_sensor_unit(S,U),
 
-    NAZ = #count{Z: assigned_zone_unit(Z,_)},
+    NAZ = #count{{Z: assigned_zone_unit(Z,_)}},
 
-    NAS = #count{SN: assigned_sensor_unit(SN,_)},
+    NAS = #count{{SN: assigned_sensor_unit(SN,_)}},
 
     maxSensor(MaxS),
     NAS < MaxS,
     NAZ > NAS,
 
-    Deg_sensor_dyn = #count{Z: zone2sensor(Z,S), assigned_zone_unit(Z,_)},
+    Deg_sensor_dyn = #count{{Z: zone2sensor(Z,S), assigned_zone_unit(Z,_)}},
 
-    Forbidden_placement_total = #max{N: num_forbidden_places_of_sensors(S,N)},
+    Forbidden_placement_total = #max{{N: num_forbidden_places_of_sensors(S,N)}},
 
 
     Num_constr_on_sensor_places_by_zones_on_U1     = 	#count{{SN: assigned_zone_unit(Z,U1), zone2sensor(Z,SN)}},
@@ -179,7 +179,7 @@ num_forbidden_places_of_sensors(S,N1+4) :- assignable_sensor_unit(S,_),
     NAZ = 2,
     NAS = 2,
 
-    Min_constraint_degree = #min{D: zone2sensor(Z,SN), degree_sensor(SN,D)},
+    Min_constraint_degree = #min{{D: zone2sensor(Z,SN), degree_sensor(SN,D)}},
 
     Minus_min_constraint_degree = 6 - Min_constraint_degree,
 
