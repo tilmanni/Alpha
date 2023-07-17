@@ -20,6 +20,11 @@ import static org.apache.commons.lang3.StringUtils.join;
  */
 public class ASPtoQueryTranslator {
 
+    /**
+     * Public option for multiset support, is true when uqhms flag is set.
+     */
+    public static boolean multiSetEnabled;
+
 
     /**
      * Pivotal Method for this class, translating a HeuristicDirective to its respective Prolog Query, by splitting it
@@ -37,7 +42,6 @@ public class ASPtoQueryTranslator {
         return translateHeuristicDirectiveBody(heuristicDirectiveToTranslate.getBody()) + ", "
                 + translateWeightAtLevel(heuristicDirectiveToTranslate.getWeightAtLevel(), weight, level) + ", "
                 + translateHeuristicDirectiveHeadAtom(heuristicDirectiveToTranslate.getHead());
-
     }
 
     /**
@@ -104,23 +108,20 @@ public class ASPtoQueryTranslator {
         String aggregateOutputVariable = VariableTerm.getAnonymousInstance().toString();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("aggregate_all(");
-        if (aggregateAtomToTranslate.getAggregatefunction() == AggregateAtom.AggregateFunctionSymbol.COUNT) {
-            sb.append("count, ");
-        } else {
-            sb.append(aggregateAtomToTranslate.getAggregatefunction().toString().toLowerCase()).append("(");
-            sb.append(aggregateAtomToTranslate.getAggregateElements().get(0).getElementTerms().get(0).toString());
-            sb.append("), ");
-        }
-        String aggregateTypePrefix = sb.toString();
-
         List<String> aggregateElementsTranslated = new ArrayList<>();
         List<String> aggregateElementResultVariables = new ArrayList<>();
         for (AggregateAtom.AggregateElement element : aggregateAtomToTranslate.getAggregateElements()) {
             sb = new StringBuilder();
             String aggregateElementResultVariable = VariableTerm.getAnonymousInstance().toString();
             aggregateElementResultVariables.add(aggregateElementResultVariable);
-            sb.append(aggregateTypePrefix);
+            sb.append("aggregate_all(");
+            if (aggregateAtomToTranslate.getAggregatefunction() == AggregateAtom.AggregateFunctionSymbol.COUNT) {
+                sb.append("count, ");
+            } else {
+                sb.append(aggregateAtomToTranslate.getAggregatefunction().toString().toLowerCase()).append("(");
+                sb.append(element.getElementTerms().get(0).toString());
+                sb.append("), ");
+            }
             sb.append(translateAggregateElement(element));
             sb.append(", ");
             sb.append(aggregateElementResultVariable);
@@ -164,15 +165,19 @@ public class ASPtoQueryTranslator {
     }
 
     private static String translateAggregateElement(AggregateAtom.AggregateElement aggregateElementToTranslate) {
-        List<String> aggregateElementTerms = new ArrayList<>();
+        List<String> aggregateElementTermsString = new ArrayList<>();
         List<String> aggregateElementLiteralsTranslated = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        for (Term aggregateTerm : aggregateElementToTranslate.getElementTerms()) {      //exclude first one for multiset
-            aggregateElementTerms.add(aggregateTerm.toString());
+        List<Term> aggregateElementTerms = aggregateElementToTranslate.getElementTerms();
+        if (!multiSetEnabled) {
+            sb.append("(");
+            for (Term aggregateTerm : aggregateElementTerms) {      //exclude first one for multiset
+                aggregateElementTermsString.add(aggregateTerm.toString());
+            }
+            sb.append(join(aggregateElementTermsString, ","));
+            sb.append("), ");
         }
-        sb.append(join(aggregateElementTerms, ","));
-        sb.append("), (");
+        sb.append("(");
         for (Literal aggregateLiteral : aggregateElementToTranslate.getElementLiterals()) {
             aggregateElementLiteralsTranslated.add(translateLiteral(aggregateLiteral));
         }

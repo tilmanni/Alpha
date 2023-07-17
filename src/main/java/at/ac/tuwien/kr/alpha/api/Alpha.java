@@ -124,7 +124,7 @@ public class Alpha {
 	}
 
 	public NormalProgram normalizeProgram(InputProgram program) {
-		return new NormalizeProgramTransformation(config.getAggregateRewritingConfig(), config.isIgnoreDomspecHeuristics(), config.isUseQueryHeuristics()).apply(program);
+		return new NormalizeProgramTransformation(config.getAggregateRewritingConfig(), config.isIgnoreDomspecHeuristics(), config.isUseQueryHeuristics(), config.isUseQueryHeuristicsMultiset()).apply(program);
 	}
 
 	public InternalProgram performProgramPreprocessing(InternalProgram program) {

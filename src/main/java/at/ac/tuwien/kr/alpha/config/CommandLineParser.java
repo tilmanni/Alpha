@@ -154,8 +154,12 @@ public class CommandLineParser {
 			.desc("ignore domain-specific heuristics defined via heuristic directives (default: " + SystemConfig.DEFAULT_IGNORE_DOMSPEC_HEURISTICS + ")")
 			.build();
 	private static final Option OPT_USE_QUERY_HEURISTICS = Option.builder("uqh").longOpt("useQueryHeuristics")
-			.desc("process domain-specific heuristics defined via heuristic directives using prolog queries, instead of the standard no-good driven approach" +
+			.desc("process domain-specific heuristics defined via heuristic directives using prolog queries, instead of the standard no-good driven approach " +
 					"(default: " + SystemConfig.DEFAULT_USE_QUERY_HEURISTICS + ")")
+			.build();
+	private static final Option OPT_USE_QUERY_HEURISTICS_MULTISET = Option.builder("uqhms").longOpt("useQueryHeuristicsMultiset")
+			.desc("process domain-specific heuristics defined via heuristic directives using prolog queries, also use multiset semantic for aggregates in heuristics " +
+					"(default: " + SystemConfig.DEFAULT_USE_QUERY_HEURISTICS_MULTISET + ")")
 			.build();
 	//@formatter:on
 
@@ -201,6 +205,7 @@ public class CommandLineParser {
 		CommandLineParser.CLI_OPTS.addOption(CommandLineParser.OPT_OUTPUT_ATOM_SEPARATOR);
 		CommandLineParser.CLI_OPTS.addOption(CommandLineParser.OPT_IGNORE_DOMSPEC_HEURISTICS);
 		CommandLineParser.CLI_OPTS.addOption(CommandLineParser.OPT_USE_QUERY_HEURISTICS);
+		CommandLineParser.CLI_OPTS.addOption(CommandLineParser.OPT_USE_QUERY_HEURISTICS_MULTISET);
 	}
 
 	/*
@@ -260,6 +265,7 @@ public class CommandLineParser {
 		this.globalOptionHandlers.put(CommandLineParser.OPT_OUTPUT_ATOM_SEPARATOR.getOpt(), this::handleAtomSeparator);
 		this.globalOptionHandlers.put(CommandLineParser.OPT_IGNORE_DOMSPEC_HEURISTICS.getOpt(), this::handleIgnoreDomspecHeuristic);
 		this.globalOptionHandlers.put(CommandLineParser.OPT_USE_QUERY_HEURISTICS.getOpt(), this::handleUseQueryHeuristics);
+		this.globalOptionHandlers.put(CommandLineParser.OPT_USE_QUERY_HEURISTICS_MULTISET.getOpt(), this::handleUseQueryHeuristicsMultiset);
 	}
 
 	private void initializeInputOptionHandlers() {
@@ -507,6 +513,10 @@ public class CommandLineParser {
 
 	private void handleUseQueryHeuristics(Option opt, SystemConfig cfg) {
 		cfg.setUseQueryHeuristics(true);
+	}
+
+	private void handleUseQueryHeuristicsMultiset(Option opt, SystemConfig cfg) {
+		cfg.setUseQueryHeuristicsMultiset(true);
 	}
 
 }

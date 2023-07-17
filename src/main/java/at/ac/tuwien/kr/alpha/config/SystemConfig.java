@@ -57,6 +57,7 @@ public class SystemConfig {
 	public static final boolean DEFAULT_SORT_ANSWER_SETS = false;
 	public static final boolean DEFAULT_IGNORE_DOMSPEC_HEURISTICS = false;
 	public static final boolean DEFAULT_USE_QUERY_HEURISTICS = false;
+	public static final boolean DEFAULT_USE_QUERY_HEURISTICS_MULTISET = false;
 	public static final List<Integer> DEFAULT_REPLAY_CHOICES = Collections.emptyList();
 	public static final boolean DEFAULT_STRATIFIED_EVALUATION = true;
 	public static final boolean DEFAULT_DISABLE_NOGOOD_DELETION = false;
@@ -80,6 +81,7 @@ public class SystemConfig {
 	private boolean sortAnswerSets = DEFAULT_SORT_ANSWER_SETS;
 	private boolean ignoreDomspecHeuristics = DEFAULT_IGNORE_DOMSPEC_HEURISTICS;
 	private boolean useQueryHeuristics = DEFAULT_USE_QUERY_HEURISTICS;
+	private boolean useQueryHeuristicsMultiset = DEFAULT_USE_QUERY_HEURISTICS_MULTISET;
 	private List<Integer> replayChoices = DEFAULT_REPLAY_CHOICES;
 	private boolean evaluateStratifiedPart = DEFAULT_STRATIFIED_EVALUATION;
 	private boolean disableNoGoodDeletion = DEFAULT_DISABLE_NOGOOD_DELETION;
@@ -206,7 +208,19 @@ public class SystemConfig {
 	}
 
 	public void setUseQueryHeuristics(boolean useQueryHeuristics) {
-		this.useQueryHeuristics = useQueryHeuristics;
+		if (!this.useQueryHeuristics) {
+			this.useQueryHeuristics = useQueryHeuristics;
+		}
+	}
+
+	public boolean isUseQueryHeuristicsMultiset() {
+		return useQueryHeuristicsMultiset;
+	}
+	public void setUseQueryHeuristicsMultiset(boolean useQueryHeuristicsMultiset) {
+		if (useQueryHeuristicsMultiset) {
+			this.useQueryHeuristics = true;
+		}
+		this.useQueryHeuristicsMultiset = useQueryHeuristicsMultiset;
 	}
 
 	public List<Integer> getReplayChoices() {

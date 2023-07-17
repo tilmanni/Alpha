@@ -174,7 +174,7 @@ public class TestUtils {
 
 	private static Solver buildSolverFromSystemConfig(InputProgram prog, SystemConfig cfg) {
 		AtomStore atomStore = new AtomStoreImpl();
-		NormalProgram normalProg = new NormalizeProgramTransformation(cfg.getAggregateRewritingConfig(), cfg.isIgnoreDomspecHeuristics(), cfg.isUseQueryHeuristics()).apply(prog);
+		NormalProgram normalProg = new NormalizeProgramTransformation(cfg.getAggregateRewritingConfig(), cfg.isIgnoreDomspecHeuristics(), cfg.isUseQueryHeuristics(), cfg.isUseQueryHeuristicsMultiset()).apply(prog);
 		InternalProgram preprocessed = cfg.isEvaluateStratifiedPart() ? new StratifiedEvaluation().apply(AnalyzedProgram.analyzeNormalProgram(normalProg))
 				: InternalProgram.fromNormalProgram(normalProg);
 		final HeuristicsConfiguration heuristicsConfiguration = getHeuristicsConfiguration(cfg);

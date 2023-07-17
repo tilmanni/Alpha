@@ -29,6 +29,7 @@ package at.ac.tuwien.kr.alpha.grounder.transformation;
 
 import at.ac.tuwien.kr.alpha.common.program.InputProgram;
 import at.ac.tuwien.kr.alpha.common.program.NormalProgram;
+import at.ac.tuwien.kr.alpha.common.prolog.ASPtoQueryTranslator;
 import at.ac.tuwien.kr.alpha.grounder.atoms.EnumerationAtom;
 import at.ac.tuwien.kr.alpha.grounder.transformation.aggregates.AggregateRewriting;
 import at.ac.tuwien.kr.alpha.grounder.transformation.aggregates.AggregateRewritingConfig;
@@ -46,10 +47,13 @@ public class NormalizeProgramTransformation extends ProgramTransformation<InputP
 
 	private final boolean useQueryHeuristics;
 
-	public NormalizeProgramTransformation(AggregateRewritingConfig aggregateCfg, boolean ignoreDomspecHeuristics, boolean useQueryHeuristics) {
+	public NormalizeProgramTransformation(AggregateRewritingConfig aggregateCfg, boolean ignoreDomspecHeuristics, boolean useQueryHeuristics, boolean useQueryHeuristicsMultiset) {
 		this.aggregateRewritingCfg = aggregateCfg;
 		this.ignoreDomspecHeuristics = ignoreDomspecHeuristics;
 		this.useQueryHeuristics = useQueryHeuristics;
+		if (useQueryHeuristicsMultiset) {
+			ASPtoQueryTranslator.multiSetEnabled = true; //FIXME Bad solution, maybe change this.
+		}
 	}
 
 	@Override
