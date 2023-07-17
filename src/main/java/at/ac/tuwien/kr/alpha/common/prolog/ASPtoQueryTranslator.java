@@ -6,6 +6,7 @@ import at.ac.tuwien.kr.alpha.common.WeightAtLevel;
 import at.ac.tuwien.kr.alpha.common.atoms.*;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveAtom;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveBody;
+import at.ac.tuwien.kr.alpha.common.terms.Term;
 import at.ac.tuwien.kr.alpha.common.terms.VariableTerm;
 
 import java.util.*;
@@ -111,26 +112,27 @@ public class ASPtoQueryTranslator {
             sb.append(aggregateAtomToTranslate.getAggregateElements().get(0).getElementTerms().get(0).toString());
             sb.append("), ");
         }
-        /*
-            Assumes all aggregate Elements use the same term before the colon, like so:
-                #sum{X : a(X); X : b(X)}
-            instead of
-                #sum{X : a(X); Y : b(Y)}
-            for simplicity. If the latter case is used, only the first aggregate element (or any using X in this example)
-            will be evaluated.
-            Does also not evaluate #sum{X, Y : a(X), b(Y)} properly, just evaluates for the first variable in front of
-            colon.
-         */
-        //TODO Fix this trough normalization.
-        sb.append("(");
+        String aggregateTypePrefix = sb.toString();
+
         List<String> aggregateElementsTranslated = new ArrayList<>();
+        List<String> aggregateElementResultVariables = new ArrayList<>();
         for (AggregateAtom.AggregateElement element : aggregateAtomToTranslate.getAggregateElements()) {
-            aggregateElementsTranslated.add(translateAggregateElement(element));
+            sb = new StringBuilder();
+            String aggregateElementResultVariable = VariableTerm.getAnonymousInstance().toString();
+            aggregateElementResultVariables.add(aggregateElementResultVariable);
+            sb.append(aggregateTypePrefix);
+            sb.append(translateAggregateElement(element));
+            sb.append(", ");
+            sb.append(aggregateElementResultVariable);
+            sb.append(")");
+            aggregateElementsTranslated.add(sb.toString());
         }
-        sb.append(join(aggregateElementsTranslated, ";"));
-        sb.append("), ");
+        sb = new StringBuilder();
+        sb.append(join(aggregateElementsTranslated, ", "));
+        sb.append(", ");
         sb.append(aggregateOutputVariable);
-        sb.append(")");
+        sb.append(" is ");
+        sb.append(join(aggregateElementResultVariables, " + "));
         ComparisonOperator lowerBoundOperator = aggregateAtomToTranslate.getLowerBoundOperator();
         ComparisonOperator upperBoundOperator = aggregateAtomToTranslate.getUpperBoundOperator();
         if (lowerBoundOperator != null) {
@@ -162,11 +164,21 @@ public class ASPtoQueryTranslator {
     }
 
     private static String translateAggregateElement(AggregateAtom.AggregateElement aggregateElementToTranslate) {
+        List<String> aggregateElementTerms = new ArrayList<>();
         List<String> aggregateElementLiteralsTranslated = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        for (Term aggregateTerm : aggregateElementToTranslate.getElementTerms()) {      //exclude first one for multiset
+            aggregateElementTerms.add(aggregateTerm.toString());
+        }
+        sb.append(join(aggregateElementTerms, ","));
+        sb.append("), (");
         for (Literal aggregateLiteral : aggregateElementToTranslate.getElementLiterals()) {
             aggregateElementLiteralsTranslated.add(translateLiteral(aggregateLiteral));
         }
-        return join(aggregateElementLiteralsTranslated, ",");
+        sb.append(join(aggregateElementLiteralsTranslated, ","));
+        sb.append(")");
+        return sb.toString();
     }
 
     private static String translateLiteral(Literal literal) {
