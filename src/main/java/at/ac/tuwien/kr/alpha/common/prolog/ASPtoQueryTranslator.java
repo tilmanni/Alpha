@@ -106,8 +106,9 @@ public class ASPtoQueryTranslator {
 
     private static String translateAggregateAtom(AggregateAtom aggregateAtomToTranslate) {
         String aggregateOutputVariable = VariableTerm.getAnonymousInstance().toString();
+        AggregateAtom.AggregateFunctionSymbol aggregateFunctionSymbol = aggregateAtomToTranslate.getAggregatefunction();
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb;
         List<String> aggregateElementsTranslated = new ArrayList<>();
         List<String> aggregateElementResultVariables = new ArrayList<>();
         for (AggregateAtom.AggregateElement element : aggregateAtomToTranslate.getAggregateElements()) {
@@ -115,10 +116,10 @@ public class ASPtoQueryTranslator {
             String aggregateElementResultVariable = VariableTerm.getAnonymousInstance().toString();
             aggregateElementResultVariables.add(aggregateElementResultVariable);
             sb.append("aggregate_all(");
-            if (aggregateAtomToTranslate.getAggregatefunction() == AggregateAtom.AggregateFunctionSymbol.COUNT) {
+            if (aggregateFunctionSymbol == AggregateAtom.AggregateFunctionSymbol.COUNT) {
                 sb.append("count, ");
             } else {
-                sb.append(aggregateAtomToTranslate.getAggregatefunction().toString().toLowerCase()).append("(");
+                sb.append(aggregateFunctionSymbol.toString().toLowerCase()).append("(");
                 sb.append(element.getElementTerms().get(0).toString());
                 sb.append("), ");
             }
@@ -131,9 +132,18 @@ public class ASPtoQueryTranslator {
         sb = new StringBuilder();
         sb.append(join(aggregateElementsTranslated, ", "));
         sb.append(", ");
-        sb.append(aggregateOutputVariable);
-        sb.append(" is ");
-        sb.append(join(aggregateElementResultVariables, " + "));
+        if (aggregateFunctionSymbol == AggregateAtom.AggregateFunctionSymbol.COUNT || aggregateFunctionSymbol == AggregateAtom.AggregateFunctionSymbol.SUM) {
+            sb.append(aggregateOutputVariable);
+            sb.append(" is ");
+            sb.append(join(aggregateElementResultVariables, " + "));
+        }
+        else {
+            sb.append(aggregateFunctionSymbol == AggregateAtom.AggregateFunctionSymbol.MAX ? "max_member(" : "min_member(");
+            sb.append(aggregateOutputVariable);
+            sb.append(", [");
+            sb.append(join(aggregateElementResultVariables, ", "));
+            sb.append("])");
+        }
         ComparisonOperator lowerBoundOperator = aggregateAtomToTranslate.getLowerBoundOperator();
         ComparisonOperator upperBoundOperator = aggregateAtomToTranslate.getUpperBoundOperator();
         if (lowerBoundOperator != null) {
