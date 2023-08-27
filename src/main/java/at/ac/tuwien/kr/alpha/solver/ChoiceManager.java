@@ -27,15 +27,8 @@
  */
 package at.ac.tuwien.kr.alpha.solver;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 import at.ac.tuwien.kr.alpha.solver.heuristics.domspec.QueryDomainSpecificHeuristicsStore;
@@ -318,6 +311,14 @@ public class ChoiceManager implements Checkable {
 
 	static ChoiceManager withDomainSpecificHeuristicsAndQueries(WritableAssignment assignment, NoGoodStore store) {
 		return new ChoiceManager(assignment, store, new QueryDomainSpecificHeuristicsStore());
+	}
+
+	public Set<Integer> getActiveChoiceAtoms() {
+		Set<Integer> activeChoiceAtoms = new LinkedHashSet<>();
+		for (Integer atom : this.choicePointInfluenceManager.getActiveChoicePointAtoms()) {
+			activeChoiceAtoms.add(getHeadDerivedByChoiceAtom(atom));
+		}
+		return activeChoiceAtoms;
 	}
 
 	/**

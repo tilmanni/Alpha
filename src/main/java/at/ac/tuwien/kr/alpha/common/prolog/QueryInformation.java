@@ -122,4 +122,8 @@ public class QueryInformation {
     public Set<String> getOccurringPredicates() {
         return this.occurringPredicates;
     }
+
+    public HeuristicDirectiveAtom getHeadAtom() {
+        return this.headAtom;
+    }
 }

@@ -225,4 +225,8 @@ public class ChoicePointInfluenceManager extends InfluenceManager {
 		}
 	}
 
+	public Set<Integer> getActiveChoicePointAtoms() {
+		return this.activeChoicePointsAtoms;
+	}
+
 }

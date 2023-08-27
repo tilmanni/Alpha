@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class QueryDomainSpecificHeuristicsStore implements DomainSpecificHeuristicsStore {
 
+    private ChoiceManager choiceManager;
     List<HeuristicDirectiveValues> priorityList;
     @Override
     public void addInfo(int heuristicId, HeuristicDirectiveValues values) {
@@ -22,13 +23,13 @@ public class QueryDomainSpecificHeuristicsStore implements DomainSpecificHeurist
 
     @Override
     public HeuristicDirectiveValues poll() {
-        this.priorityList = QueryInformationStorage.getQueryResults();
+        this.priorityList = QueryInformationStorage.getQueryResults(choiceManager);
         return priorityList.size() != 0 ? priorityList.get(0) : null;
     }
 
     @Override
     public void setChoiceManager(ChoiceManager choiceManager) {
-        return;
+        this.choiceManager = choiceManager;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class QueryDomainSpecificHeuristicsStore implements DomainSpecificHeurist
 
 
     public void updateInformation() {
-        this.priorityList = QueryInformationStorage.getQueryResults();
+        this.priorityList = QueryInformationStorage.getQueryResults(choiceManager);
     }
 
 

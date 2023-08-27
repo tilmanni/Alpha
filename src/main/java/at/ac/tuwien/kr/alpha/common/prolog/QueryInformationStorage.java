@@ -3,8 +3,10 @@ package at.ac.tuwien.kr.alpha.common.prolog;
 
 import at.ac.tuwien.kr.alpha.common.AtomStore;
 
+import at.ac.tuwien.kr.alpha.common.Predicate;
 import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicDirectiveValues;
 import at.ac.tuwien.kr.alpha.grounder.NaiveGrounder;
+import at.ac.tuwien.kr.alpha.solver.ChoiceManager;
 
 import java.util.*;
 
@@ -57,14 +59,21 @@ public class QueryInformationStorage {
         The workaround with the results ArrayList is (currently) necessary, as the PriorityQueue must have a fixed capacity,
         which we might not know beforehand.
     */
-    public static List<HeuristicDirectiveValues> getQueryResults() {
+    public static List<HeuristicDirectiveValues> getQueryResults(ChoiceManager choiceManager) {
         if (atomStore == null) {
             return null;
         }
+        Set<Integer> activeChoicePointAtoms = choiceManager.getActiveChoiceAtoms();
+        Set<Predicate> activeChoicePointPredicates = new LinkedHashSet<>();
+        for (Integer atom : activeChoicePointAtoms) {
+            activeChoicePointPredicates.add(atomStore.get(atom).getPredicate());
+        }
         ArrayList<HeuristicDirectiveValues> results = new ArrayList<>();
         for (QueryInformation queryInformationToGetResultsFrom : QUERY_INFORMATION) {
-            queryInformationToGetResultsFrom.updateResults(atomStore);
-            results.addAll(queryInformationToGetResultsFrom.getQueryResults());
+            if (activeChoicePointPredicates.contains(queryInformationToGetResultsFrom.getHeadAtom().getAtom().getPredicate())) {
+                queryInformationToGetResultsFrom.updateResults(atomStore);
+                results.addAll(queryInformationToGetResultsFrom.getQueryResults());
+            }
         }
         results.sort(new HeuristicDirectiveValues.PriorityComparator());
         Collections.reverse(results);
