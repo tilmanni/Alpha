@@ -250,8 +250,14 @@ public class TrailAssignment implements WritableAssignment, Checkable {
 				if (getTruth(backtrackAtom) == MBT) {
 					mbtCount--;
 				}
-				if (syncPrologAssignment && getTruth(backtrackAtom) == TRUE) {
-					NaiveGrounder.getPrologModuleInstance().removeAtom(backtrackAtom);
+				if (syncPrologAssignment) {
+					if (getTruth(backtrackAtom) == TRUE) {
+						NaiveGrounder.getPrologModuleInstance().removeAtom(backtrackAtom);
+					}
+					else if (getTruth(backtrackAtom) == FALSE) {
+						NaiveGrounder.getPrologModuleInstance().removeNegativeAtom(backtrackAtom);
+					}
+
 				}
 				values[backtrackAtom] = 0;
 			}
@@ -389,6 +395,11 @@ public class TrailAssignment implements WritableAssignment, Checkable {
 				strongDecisionLevels[atom] = getDecisionLevel();
 				if (syncPrologAssignment) {
 					NaiveGrounder.getPrologModuleInstance().addAtom(atom);
+				}
+			}
+			if (value == FALSE) {
+				if (syncPrologAssignment) {
+					NaiveGrounder.getPrologModuleInstance().addNegativeAtom(atom);
 				}
 			}
 			if (impliedBy != CLOSING_INDICATOR_ANTECEDENT) {

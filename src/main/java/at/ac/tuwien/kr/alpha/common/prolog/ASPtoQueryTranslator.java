@@ -53,7 +53,8 @@ public class ASPtoQueryTranslator {
      * @return A String containing the negation of the head atom.
      */
     private static String translateHeuristicDirectiveHeadAtom(HeuristicDirectiveAtom heuristicDirectiveHeadAtom) {
-        return "\\+ " + translateHeuristicDirectiveAtom(heuristicDirectiveHeadAtom);
+        String translatedHeuristicDirectiveHeadAtom = translateHeuristicDirectiveAtom(heuristicDirectiveHeadAtom);
+        return "\\+ " + translatedHeuristicDirectiveHeadAtom + ", " + "\\+ " + addNegativePredicate(translatedHeuristicDirectiveHeadAtom);
     }
 
 
@@ -345,4 +346,6 @@ public class ASPtoQueryTranslator {
     private static String addPrologPrefix(String string) {
         return PrologModule.PROLOG_PREFIX + string;
     }
+
+    private static String addNegativePredicate(String string) {return "f(" + string + ")";}
 }

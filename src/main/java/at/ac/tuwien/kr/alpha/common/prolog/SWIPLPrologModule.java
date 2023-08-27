@@ -37,7 +37,12 @@ public class SWIPLPrologModule implements PrologModule {
     //queryTime as name lead to inexplicable problems
     public  long qTime;
 
+    public long totalQueries;
+
+    public long nonEmptyQueries;
+
     public SWIPLPrologModule() {
+        poseQuery("dynamic f/1");
     }
 
 
@@ -83,6 +88,32 @@ public class SWIPLPrologModule implements PrologModule {
         addTime += System.nanoTime() - startTime;
     }
 
+    @Override
+    public void addNegativeAtom(Integer atomToAdd) {
+        addNegativeAtom(atomStore.get(atomToAdd));
+    }
+
+    public  void addNegativeAtom(at.ac.tuwien.kr.alpha.common.atoms.Atom atomToAdd) {
+        long startTime = System.nanoTime();
+        if (atomToAdd.getPredicate().isInternal()) {
+            return;
+        }
+        try {
+            Query q =
+                    new Query(
+                            "asserta",
+                            new Term[]{Term.textToTerm(addNegativePredicate(addPrologPrefix(atomToAdd.toString())))}
+                    );
+            if (!q.hasSolution()) {
+                System.out.println("Failed assertion at " + atomToAdd);
+            }
+        } catch (PrologException prologException) {
+            System.out.println("Prolog Exception while asserting " + atomToAdd);
+            System.out.println(prologException.getMessage());
+        }
+        addTime += System.nanoTime() - startTime;
+    }
+
 
     public  void addAtoms(Set<at.ac.tuwien.kr.alpha.common.atoms.Atom> atomsToAdd) {
 
@@ -105,6 +136,30 @@ public class SWIPLPrologModule implements PrologModule {
                     new Query(
                             "retract",
                             new Term[]{Term.textToTerm(addPrologPrefix(atomToRemove.toString()))}
+                    );
+            if (!q.hasSolution()) {
+                System.out.println("Failed retracting at " + atomToRemove);
+            }
+        } catch (PrologException prologException) {
+            System.out.println("Prolog Exception while removing " + atomToRemove);
+        }
+        removeTime += System.nanoTime() - startTime;
+    }
+
+    public  void removeNegativeAtom(Integer atomToRemove) {
+        this.removeNegativeAtom(atomStore.get(atomToRemove));
+    }
+
+    public  void removeNegativeAtom(at.ac.tuwien.kr.alpha.common.atoms.Atom atomToRemove) {
+        long startTime = System.nanoTime();
+        if (atomToRemove.getPredicate().isInternal()) {
+            return;
+        }
+        try {
+            Query q =
+                    new Query(
+                            "retract",
+                            new Term[]{Term.textToTerm(addNegativePredicate(addPrologPrefix(atomToRemove.toString())))}
                     );
             if (!q.hasSolution()) {
                 System.out.println("Failed retracting at " + atomToRemove);
@@ -158,6 +213,9 @@ public class SWIPLPrologModule implements PrologModule {
         Term term = Term.textToTerm(query);
         Query q = new Query(term);
         ArrayList<Map<String, String>> queryResults = new ArrayList<>();
+        if (q.hasSolution()) {
+            nonEmptyQueries++;
+        }
         try {
             while (q.hasNext()) {
                 Map<String, String> solution = new HashMap<>();
@@ -173,6 +231,7 @@ public class SWIPLPrologModule implements PrologModule {
         } catch (PrologException e) {
             e.printStackTrace();
         }
+        totalQueries++;
         qTime += System.nanoTime() - startTime;
         return queryResults;
     }
@@ -201,12 +260,16 @@ public class SWIPLPrologModule implements PrologModule {
         sb.append("query time=").append(getQTime() / 1000000).append(" ms, ");
         long totalTime = getAddTime() + getRemoveTime() + getQTime();
         sb.append("total time=").append(totalTime / 1000000).append(" ms");
+        sb.append("\ntotal queries=").append(totalQueries);
+        sb.append(", non empty queries=").append(nonEmptyQueries);
         return sb.toString();
     }
 
     private static String addPrologPrefix(String string) {
         return PrologModule.PROLOG_PREFIX + string;
     }
+
+    private static String addNegativePredicate(String string) {return "f(" + string + ")";}
 
 
 }

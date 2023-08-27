@@ -18,7 +18,11 @@ public interface PrologModule {
 
     void addAtom(Integer atomToAdd);
 
+    void addNegativeAtom(Integer atomToAdd);
+
     void removeAtom(Integer atomToRemove);
+
+    void removeNegativeAtom(Integer atomToRemove);
 
     boolean poseQuery(String query);
 
