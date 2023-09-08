@@ -58,31 +58,24 @@ public class QueryInformation {
 
         this.occurringPredicates = new HashSet<>();
         this.occurringPredicates.add(heuristicDirective.getHead().getAtom().getPredicate().toString());
-        for (HeuristicDirectiveAtom positiveHeuristicDirectiveAtom : heuristicDirective.getBody().getBodyAtomsPositive()) {
-            if (positiveHeuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
-                this.occurringPredicates.add(positiveHeuristicDirectiveAtom.getAtom().getPredicate().toString());
-            } else if (positiveHeuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
-                AggregateAtom positiveAggregateAtom = (AggregateAtom) positiveHeuristicDirectiveAtom.getAtom();
-                for (Predicate occurringPredicate : positiveAggregateAtom.getAggregateBodyPredicates()) {
-                    this.occurringPredicates.add(occurringPredicate.toString());
-                }
-            }
-        }
-        for (HeuristicDirectiveAtom negativeHeuristicDirectiveAtom : heuristicDirective.getBody().getBodyAtomsNegative()) {
-            if (negativeHeuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
-                this.occurringPredicates.add(negativeHeuristicDirectiveAtom.getAtom().getPredicate().toString());
-            } else if (negativeHeuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
-                AggregateAtom negativeAggregateAtom = (AggregateAtom) negativeHeuristicDirectiveAtom.getAtom();
-                for (Predicate occurringPredicate : negativeAggregateAtom.getAggregateBodyPredicates()) {
-                    this.occurringPredicates.add(occurringPredicate.toString());
-                }
-            }
-        }
+        initializeOccurringPredicates(heuristicDirective.getBody().getBodyAtomsPositive());
+        initializeOccurringPredicates(heuristicDirective.getBody().getBodyAtomsNegative());
 
         this.stringQuery = ASPtoQueryTranslator.translateHeuristicDirective(heuristicDirective, weightVariableTerm, levelVariableTerm);
 
+    }
 
-
+    private void initializeOccurringPredicates(Collection<HeuristicDirectiveAtom> heuristicDirectiveAtoms) {
+        for (HeuristicDirectiveAtom heuristicDirectiveAtom : heuristicDirectiveAtoms) {
+            if (heuristicDirectiveAtom.getAtom() instanceof BasicAtom) {
+                this.occurringPredicates.add(heuristicDirectiveAtom.getAtom().getPredicate().toString());
+            } else if (heuristicDirectiveAtom.getAtom() instanceof AggregateAtom) {
+                AggregateAtom aggregateAtom = (AggregateAtom) heuristicDirectiveAtom.getAtom();
+                for (Predicate occurringPredicate : aggregateAtom.getAggregateBodyPredicates()) {
+                    this.occurringPredicates.add(occurringPredicate.toString());
+                }
+            }
+        }
     }
 
     /**
@@ -104,7 +97,12 @@ public class QueryInformation {
         for (Map<String, String> solution : results) {
             Unifier unifier = new Unifier();
             for (int i = 2; i < variables.length; i++) {
-                unifier.put(variables[i], ConstantTerm.getInstance(Integer.parseInt(solution.get(variables[i].toString()))));
+                String str = solution.get(variables[i].toString());
+                if (str.matches("-?\\d+")){
+                    unifier.put(variables[i], ConstantTerm.getInstance(Integer.parseInt(str)));
+                } else {
+                    unifier.put(variables[i], ConstantTerm.getSymbolicInstance(str));
+                }
             }
             BasicAtom groundHeadAtom = (BasicAtom) headAtom.substitute(unifier).getAtom();
             int groundHeadId = atomStore.putIfAbsent(groundHeadAtom);
