@@ -10,6 +10,7 @@ import at.ac.tuwien.kr.alpha.common.atoms.AggregateAtom.AggregateFunctionSymbol;
 import at.ac.tuwien.kr.alpha.common.atoms.AggregateLiteral;
 import at.ac.tuwien.kr.alpha.common.atoms.ComparisonAtom;
 import at.ac.tuwien.kr.alpha.common.atoms.Literal;
+import at.ac.tuwien.kr.alpha.common.heuristics.HeuristicAggregateAtom;
 import at.ac.tuwien.kr.alpha.common.rule.BasicRule;
 import at.ac.tuwien.kr.alpha.common.terms.ArithmeticTerm;
 import at.ac.tuwien.kr.alpha.common.terms.ArithmeticTerm.ArithmeticOperator;
@@ -79,17 +80,18 @@ public final class AggregateOperatorNormalization {
 			List<Literal> retVal = new ArrayList<>();
 			VariableTerm decrementedBound;
 			ComparisonOperator lowerBoundOp = atom.getLowerBoundOperator();
+			boolean isHeuristicAggregateAtom = lit.getAtom() instanceof HeuristicAggregateAtom;
 			if (lowerBoundOp.equals(ComparisonOperator.LT)) {
 				decrementedBound = VariableTerm.getAnonymousInstance();
-				retVal.add(createLowerBoundedAggregateLiteral(ComparisonOperator.LE, decrementedBound, atom, !lit.isNegated()));
+				retVal.add(createLowerBoundedAggregateLiteral(ComparisonOperator.LE, decrementedBound, atom, !lit.isNegated(), isHeuristicAggregateAtom));
 				retVal.add(createPlusOneTerm(atom.getLowerBoundTerm(), decrementedBound));
 			} else if (lowerBoundOp.equals(ComparisonOperator.NE)) {
-				retVal.add(createLowerBoundedAggregateLiteral(ComparisonOperator.EQ, atom.getLowerBoundTerm(), atom, lit.isNegated()));
+				retVal.add(createLowerBoundedAggregateLiteral(ComparisonOperator.EQ, atom.getLowerBoundTerm(), atom, lit.isNegated(), isHeuristicAggregateAtom));
 			} else if (lowerBoundOp.equals(ComparisonOperator.GT)) {
-				retVal.add(createLowerBoundedAggregateLiteral(ComparisonOperator.LE, atom.getLowerBoundTerm(), atom, lit.isNegated()));
+				retVal.add(createLowerBoundedAggregateLiteral(ComparisonOperator.LE, atom.getLowerBoundTerm(), atom, lit.isNegated(), isHeuristicAggregateAtom));
 			} else if (lowerBoundOp.equals(ComparisonOperator.GE)) {
 				decrementedBound = VariableTerm.getAnonymousInstance();
-				retVal.add(createLowerBoundedAggregateLiteral(ComparisonOperator.LE, decrementedBound, atom, lit.isNegated()));
+				retVal.add(createLowerBoundedAggregateLiteral(ComparisonOperator.LE, decrementedBound, atom, lit.isNegated(), isHeuristicAggregateAtom));
 				retVal.add(createPlusOneTerm(atom.getLowerBoundTerm(), decrementedBound));
 			} else {
 				throw new IllegalStateException("No operator rewriting logic available for literal: " + lit);
@@ -98,9 +100,14 @@ public final class AggregateOperatorNormalization {
 		}
 	}
 
-	private static AggregateLiteral createLowerBoundedAggregateLiteral(ComparisonOperator op, Term lowerBoundTerm, AggregateAtom aggregateAtom, boolean isNegated) {
-		return new AggregateLiteral(new AggregateAtom(op, lowerBoundTerm, aggregateAtom.getAggregatefunction(),
-			aggregateAtom.getAggregateElements()), isNegated);
+	private static AggregateLiteral createLowerBoundedAggregateLiteral(ComparisonOperator op, Term lowerBoundTerm, AggregateAtom aggregateAtom, boolean isNegated, boolean isHeuristicAggregateAtom) {
+		if (isHeuristicAggregateAtom) {
+			return new AggregateLiteral(new HeuristicAggregateAtom(op, lowerBoundTerm, aggregateAtom.getAggregatefunction(),
+					aggregateAtom.getAggregateElements()), isNegated);
+		} else {
+			return new AggregateLiteral(new AggregateAtom(op, lowerBoundTerm, aggregateAtom.getAggregatefunction(),
+					aggregateAtom.getAggregateElements()), isNegated);
+		}
 	}
 
 	/**

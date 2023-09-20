@@ -59,16 +59,16 @@ public class ReplacementEncoder {
      * @param id the aggregate atoms id
      * @return A map containing both the positive and negative replacement atoms in two separate lists
      */
-    public static Map<String, List<HeuristicDirectiveAtom>> getReplacements(AggregateAtom aggregateAtom, Term aggregateArguments, String id) {
+    public static Map<String, List<HeuristicDirectiveAtom>> getReplacements(AggregateAtom aggregateAtom, boolean isNegated, Term aggregateArguments, String id) {
         AggregateAtom.AggregateFunctionSymbol function = aggregateAtom.getAggregatefunction();
         ComparisonOperator operator = aggregateAtom.getLowerBoundOperator();
         Term resultTerm = aggregateAtom.getLowerBoundTerm();
         switch (function) {
             case COUNT:
                 if (operator == ComparisonOperator.EQ) {
-                    return encodeCountEq(aggregateArguments, resultTerm, id);
+                    return encodeCountEq(aggregateArguments, resultTerm, id, isNegated);
                 } else if (operator == ComparisonOperator.LE) {
-                    return encodeCountLe(aggregateArguments, resultTerm, id);
+                    return encodeCountLe(aggregateArguments, resultTerm, id, isNegated);
                 } else {
                     throw new UnsupportedOperationException("No fitting encoder for aggregate function " + function + "and operator " + operator + "!");
                 }
@@ -86,9 +86,9 @@ public class ReplacementEncoder {
                 }
             case SUM:
                 if (operator == ComparisonOperator.EQ) {
-                    return encodeSumEq(aggregateArguments, resultTerm, id);
+                    return encodeSumEq(aggregateArguments, resultTerm, id, isNegated);
                 } else if (operator == ComparisonOperator.LE) {
-                    return encodeSumLe(aggregateArguments, resultTerm, id);
+                    return encodeSumLe(aggregateArguments, resultTerm, id, isNegated);
                 } else {
                     throw new UnsupportedOperationException("No fitting encoder for aggregate function " + function + "and operator " + operator + "!");
                 }
@@ -106,21 +106,25 @@ public class ReplacementEncoder {
      * @param id The aggregates id
      * @return A map containing both the positive and negative replacement atoms in two separate lists
      */
-    private static Map<String, List<HeuristicDirectiveAtom>> encodeCountEq(Term argumentTerm, Term resultTerm, String id) {
+    private static Map<String, List<HeuristicDirectiveAtom>> encodeCountEq(Term argumentTerm, Term resultTerm, String id, boolean isNegated) {
         List<HeuristicDirectiveAtom> positiveAtoms = new ArrayList<>();
         List<HeuristicDirectiveAtom> negativeAtoms = new ArrayList<>();
 
         String countCandidateName = new ST(COUNT_CANDIDATE_TEMPLATE).add("id", id).render();
         String sortingGridResultName = new ST(COUNT_SORTING_GRID_RESULT_TEMPLATE).add("id", id).render();
 
+        Term standInResultTerm = isNegated ? VariableTerm.getAnonymousInstance() : resultTerm;
+
         Term resultPlusOne = VariableTerm.getAnonymousInstance();
         Integer one = 1;
-        Term arithmeticTerm = ArithmeticTerm.getInstance(resultTerm, ArithmeticTerm.ArithmeticOperator.PLUS, ConstantTerm.getInstance(one));
+        Term arithmeticTerm = ArithmeticTerm.getInstance(standInResultTerm, ArithmeticTerm.ArithmeticOperator.PLUS, ConstantTerm.getInstance(one));
 
-        positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(countCandidateName, 2, true), argumentTerm, resultTerm)));
-        positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(sortingGridResultName, 2, true), argumentTerm, resultTerm)));
+        positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(countCandidateName, 2, true), argumentTerm, standInResultTerm)));
+        positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(sortingGridResultName, 2, true), argumentTerm, standInResultTerm)));
         positiveAtoms.add(HeuristicDirectiveAtom.body(null, new ComparisonAtom(resultPlusOne, arithmeticTerm, ComparisonOperator.EQ)));
-
+        if (isNegated) {
+            positiveAtoms.add(HeuristicDirectiveAtom.body(null, new ComparisonAtom(resultTerm, standInResultTerm, ComparisonOperator.NE)));
+        }
         negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_T, new BasicAtom(Predicate.getInstance(sortingGridResultName, 2, true), argumentTerm, resultPlusOne)));
 
         Map<String, List<HeuristicDirectiveAtom>> map = new HashMap<>();
@@ -139,14 +143,17 @@ public class ReplacementEncoder {
      * @param id The aggregates id
      * @return A map containing both the positive and negative replacement atoms in two separate lists
      */
-    private static Map<String, List<HeuristicDirectiveAtom>> encodeCountLe(Term argumentTerm, Term resultTerm, String id) {
+    private static Map<String, List<HeuristicDirectiveAtom>> encodeCountLe(Term argumentTerm, Term resultTerm, String id, boolean isNegated) {
         List<HeuristicDirectiveAtom> positiveAtoms = new ArrayList<>();
         List<HeuristicDirectiveAtom> negativeAtoms = new ArrayList<>();
 
         String outputPredicateName = new ST(AGGREGATE_RESULT_TEMPLATE).add("id", id).render();
 
-        positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(outputPredicateName, 2, true), argumentTerm, resultTerm)));
-
+        if (isNegated) {
+            negativeAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(outputPredicateName, 2, true), argumentTerm, resultTerm)));
+        } else {
+            positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(outputPredicateName, 2, true), argumentTerm, resultTerm)));
+        }
         Map<String, List<HeuristicDirectiveAtom>> map = new HashMap<>();
         map.put("positive", positiveAtoms);
         map.put("negative", negativeAtoms);
@@ -289,7 +296,7 @@ public class ReplacementEncoder {
      * @param id The aggregates id
      * @return A map containing both the positive and negative replacement atoms in two separate lists
      */
-    private static Map<String, List<HeuristicDirectiveAtom>> encodeSumEq(Term argumentTerm, Term resultTerm, String id) {
+    private static Map<String, List<HeuristicDirectiveAtom>> encodeSumEq(Term argumentTerm, Term resultTerm, String id, boolean isNegated) {
         List<HeuristicDirectiveAtom> positiveAtoms = new ArrayList<>();
         List<HeuristicDirectiveAtom> negativeAtoms = new ArrayList<>();
 
@@ -306,7 +313,7 @@ public class ReplacementEncoder {
 
         positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(positivePartialSumName, 3, true), argumentTerm, positiveSum, VariableTerm.getAnonymousInstance())));
         positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(negativePartialSumName, 3, true), argumentTerm, negativeSum, VariableTerm.getAnonymousInstance())));
-        positiveAtoms.add(HeuristicDirectiveAtom.body(null, new ComparisonAtom(resultTerm, arithmeticTerm, ComparisonOperator.EQ)));
+        positiveAtoms.add(HeuristicDirectiveAtom.body(null, new ComparisonAtom(resultTerm, arithmeticTerm, isNegated ? ComparisonOperator.NE : ComparisonOperator.EQ)));
 
 
         negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_T, new BasicAtom(Predicate.getInstance(positivePartialSumHasGreaterName, 2, true), argumentTerm, positiveSum)));
@@ -331,7 +338,7 @@ public class ReplacementEncoder {
      * @param id The aggregates id
      * @return A map containing both the positive and negative replacement atoms in two separate lists
      */
-    private static Map<String, List<HeuristicDirectiveAtom>> encodeSumLe(Term argumentTerm, Term resultTerm, String id) {
+    private static Map<String, List<HeuristicDirectiveAtom>> encodeSumLe(Term argumentTerm, Term resultTerm, String id, boolean isNegated) {
         List<HeuristicDirectiveAtom> positiveAtoms = new ArrayList<>();
         List<HeuristicDirectiveAtom> negativeAtoms = new ArrayList<>();
 
@@ -350,7 +357,7 @@ public class ReplacementEncoder {
         positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(positivePartialSumName, 3, true), argumentTerm, positiveSum, VariableTerm.getAnonymousInstance())));
         positiveAtoms.add(HeuristicDirectiveAtom.body(DEFAULT_BODY_SIGNS, new BasicAtom(Predicate.getInstance(negativePartialSumName, 3, true), argumentTerm, negativeSum, VariableTerm.getAnonymousInstance())));
         positiveAtoms.add(HeuristicDirectiveAtom.body(null, new ComparisonAtom(sum, arithmeticTerm, ComparisonOperator.EQ)));
-        positiveAtoms.add(HeuristicDirectiveAtom.body(null, new ComparisonAtom(resultTerm, sum, ComparisonOperator.LE)));
+        positiveAtoms.add(HeuristicDirectiveAtom.body(null, new ComparisonAtom(resultTerm, sum, isNegated ? ComparisonOperator.GT : ComparisonOperator.LE)));
 
 
         negativeAtoms.add(HeuristicDirectiveAtom.body(SIGNS_T, new BasicAtom(Predicate.getInstance(positivePartialSumHasGreaterName, 2, true), argumentTerm, positiveSum)));

@@ -184,7 +184,7 @@ public final class AggregateRewritingContext {
 		private Set<Atom> buildOutputAtoms() {
 			Set<Atom> tempOutputAtoms = new HashSet<>();
 
-			Map<String, List<HeuristicDirectiveAtom>> replacement = ReplacementEncoder.getReplacements(literal.getAtom(), aggregateArguments, id);
+			Map<String, List<HeuristicDirectiveAtom>> replacement = ReplacementEncoder.getReplacements(literal.getAtom(), literal.isNegated(), aggregateArguments, id);
 
 			positiveConditions = replacement.get("positive");
 			negativeConditions = replacement.get("negative");
