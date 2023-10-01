@@ -165,9 +165,7 @@ public class ASPtoQueryTranslator {
             }
             sb.append(aggregateAtomToTranslate.getUpperBoundTerm());
             sb.append(" ");
-            if (upperBoundOperator.toString().equals("!=") || upperBoundOperator.toString().equals("=")) {
-                upperBoundOperator = upperBoundOperator.getNegation();
-            }
+            upperBoundOperator = getOpposite(upperBoundOperator);
             sb.append(translateComparisonOperator(upperBoundOperator));
             sb.append(" ");
             sb.append(aggregateOutputVariable);
@@ -341,6 +339,25 @@ public class ASPtoQueryTranslator {
             this.isCovered = isCovered;
             this.assignedVariable = assignedVariable;
         }
+    }
+
+    private static ComparisonOperator getOpposite(ComparisonOperator comparisonOperator) {
+        switch (comparisonOperator) {
+            case EQ:
+                return ComparisonOperator.NE;
+            case NE:
+                return ComparisonOperator.EQ;
+            case LT:
+                return ComparisonOperator.GT;
+            case GT:
+                return ComparisonOperator.LT;
+            case LE:
+                return ComparisonOperator.GE;
+            case GE:
+                return ComparisonOperator.LE;
+
+        }
+        return null;
     }
 
     private static String addPrologPrefix(String string) {
